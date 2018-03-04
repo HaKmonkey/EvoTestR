@@ -11,12 +11,22 @@ evo.test <- function(timesteps = 50, terrain, herbivore.health = c(100), herbivo
     temp <- sample(Enz, size = 3, replace = FALSE)
     plants[[i]] <- c(plants[[i]],temp)
   }
-  # probability associated with quantile for terrain height
-  prob.plant <- c()
+
+  # quantiles for terrain height that constrain plant placement
+  prob.p1 <- quantile(terrain, probs = .22)
+  prob.p2 <- quantile(terrain, probs = seq(.2, .42))
+  prob.p3 <- quantile(terrain, probs = seq(.4, .62))
+  prob.p4 <- quantile(terrain, probs = seq(.6, .82))
+  prob.p5 <- quantile(terrain, probs = seq(.8, 1))
+  p1 <- c("", plants[[1]])
+  p2 <- c("", plants[[2]])
+  p3 <- c("", plants[[3]])
+  p4 <- c("", plants[[4]])
+  p5 <- c("", plants[[5]])
 
   # creating herbivore array
   herbivore.generation <- array(data = 0, dim = c(nrow(terrain), ncol(terrain), (timesteps + 1)))
-  herbivores <- c(0, 5)
+  herbivores <- c(0, herbivore.health)
   p.herb <- c((1 - sum(herb.frac)), herb.frac)
 
   # populating initial plant and herbivore timestep (at 0)
@@ -27,7 +37,17 @@ evo.test <- function(timesteps = 50, terrain, herbivore.health = c(100), herbivo
         herbivore.generation[r, c, 1] <- NA
       }else{
         # make sure plants are not placed outside of their quantile for height
-        plant.generation[r, c, 1] <- sample(plants, size = 1, replace = TRUE, prob = .5)
+        # setting probabilites now
+        if(terrain[r,c] <= prob.p1){
+          plant.generation[r, c, 1] <- sample(p1, size = 1, replace = FALSE, prob = .5)
+        }else if(terrain[r,c] <= prob.p2){
+          plant.generation[r, c, 1] <- sample(p2, size = 1, replace = FALSE, prob = .5)
+        }else if(terrain[r,c] <= prob.p3){
+          plant.generation[r, c, 1] <- sample(p3, size = 1, replace = FALSE, prob = .5)
+        }else if(terrain[r,c] <= prob.p4){
+          plant.generation[r, c, 1] <- sample(p4, size = 1, replace = FALSE, prob = .5)
+        }else if(terrain[r,c] <= prob.p5)
+          plant.generation[r, c, 1] <- sample(p5, size = 1, replace = FALSE, prob = .5)
         herbivore.generation[r, c, 1] <- sample(herbivores, size = 1, replace = FALSE, prob = p.herb)
       }
     }
