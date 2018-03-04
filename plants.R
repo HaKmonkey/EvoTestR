@@ -1,11 +1,11 @@
 # ===========================================================================================================================================
-new.loc.plant <- function(mat, row, col){
+new.loc.plant <- function(plants, row, col, terrain){
   possible.location <- as.matrix(expand.grid(row + c(-1, 0, 1), col + c(-1, 0, 1)))
 
   # get rid of the points outside of the matrix
   out <- numeric()
   for(i in 1:nrow(possible.location)){
-    if(possible.location[i, 1] > nrow(mat) || possible.location[i, 2] > nrow(mat) || possible.location[i, 1] == 0 || possible.location[i, 2] == 0)
+    if(possible.location[i, 1] > nrow(plants) || possible.location[i, 2] > nrow(plants) || possible.location[i, 1] == 0 || possible.location[i, 2] == 0)
       out <- c(out, i)
   }
 
@@ -15,12 +15,33 @@ new.loc.plant <- function(mat, row, col){
   # get rid of locations that are water ***
   water <- numeric()
   for(i in 1:nrow(possible.location)){
-    if(is.na(mat[possible.location[i, 1], possible.location[i, 2]]))
+    if(is.na(plants[possible.location[i, 1], possible.location[i, 2]]))
       water <- c(water, i)
   }
 
   if(length(water) != 0)
     possible.location <- possible.location[- water, ]
+
+  # get rid of values outside of the height limit
+
+  #quantiles for terrain height that constrain plant placement
+  #prob.p1 <- quantile(terrain, probs = .22)
+  #prob.p2 <- quantile(terrain, probs = seq(.2, .42))
+  #prob.p3 <- quantile(terrain, probs = seq(.4, .62))
+  #prob.p4 <- quantile(terrain, probs = seq(.6, .82))
+  #prob.p5 <- quantile(terrain, probs = seq(.8, 1))
+
+  #plants[row, col][1] ==
+
+  #height <- numeric()
+  #for(i in 1:nrow(possible.location)){
+    #if(plants[possible.location[i, 1], possible.location[i, 2]])
+    #if(terrain[possible.location[i, 1], possible.location[1, 2]] <= )
+      #height <- c(height, i)
+  #}
+
+  if(length(height) != 0)
+    possible.location <- possible.location[- height, ]
 
   # if there is only the origin left exit reproduce function **
   if(class(possible.location) != "matrix")
@@ -64,9 +85,9 @@ plant.timestep <- function(plants, terrain, info.plant){
       return(cell_2 <- sample(c(cell_1, cell_2), 1, prob = .5)))
     }
 
-    reproduce.plant <- function(row, col, plants){
+    reproduce.plant <- function(row, col, plants, terrain){
       if(runif(1) <= .5){
-        new.location <- new.loc.plant(plants, row, col)
+        new.location <- new.loc.plant(plants, row, col, terrain)
         # checks for competetion
         if(plants[new.location[1], new.location[2]] == ""){
           plants[new.location[1], new.location[2]] <- plants[row, col]

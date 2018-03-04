@@ -3,13 +3,16 @@ evo.test <- function(timesteps = 50, terrain, herbivore.health = c(100), herbivo
 
   # create plants array
   plant.generation <- array(data = "", dim = c(nrow(terrain), ncol(terrain), (timesteps + 1)))
+
+  # possibly move this to plant setup function (again)
+  # look at using reference classes for plants' enzymes
   # plants are randomly assigned the three enzymes that digest them
   # the order of the enzymes gives the amount of health returned
   Enz <- c('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p')
   plants <- list(c('p1'), c('p2'), c('p3'), c('p4'), c('p5'))
   for(i in 1:5){
     temp <- sample(Enz, size = 3, replace = FALSE)
-    plants[[i]] <- c(plants[[i]],temp)
+    plants[[i]] <- plants[[i]] = temp
   }
 
   # quantiles for terrain height that constrain plant placement
