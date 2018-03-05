@@ -1,4 +1,9 @@
-# ===========================================================================================================================================
+new.plant <- function(enz1, enz2, enz3, val1 = 25, val2 = 12.5, val3 = 6.25){
+  output <- list(enz1 = enz1, enz2 = enz2, enz3 = enz3, val1 = val1,  val2 = val2, val3 = val3)
+  class(output) <- "plant"
+  return(output)
+}
+# ==========================================================================================================
 new.loc.plant <- function(plants, row, col, terrain){
   possible.location <- as.matrix(expand.grid(row + c(-1, 0, 1), col + c(-1, 0, 1)))
 
@@ -23,22 +28,31 @@ new.loc.plant <- function(plants, row, col, terrain){
     possible.location <- possible.location[- water, ]
 
   # get rid of values outside of the height limit
+  # quantiles for terrain height that constrain plant placement
+  quant.p1 <- quantile(terrain, probs = .22)
+  quant.p2 <- quantile(terrain, probs = seq(.2, .42))
+  quant.p3 <- quantile(terrain, probs = seq(.4, .62))
+  quant.p4 <- quantile(terrain, probs = seq(.6, .82))
+  quant.p5 <- quantile(terrain, probs = seq(.8, 1))
 
-  #quantiles for terrain height that constrain plant placement
-  #prob.p1 <- quantile(terrain, probs = .22)
-  #prob.p2 <- quantile(terrain, probs = seq(.2, .42))
-  #prob.p3 <- quantile(terrain, probs = seq(.4, .62))
-  #prob.p4 <- quantile(terrain, probs = seq(.6, .82))
-  #prob.p5 <- quantile(terrain, probs = seq(.8, 1))
-
-  #plants[row, col][1] ==
-
-  #height <- numeric()
-  #for(i in 1:nrow(possible.location)){
-    #if(plants[possible.location[i, 1], possible.location[i, 2]])
-    #if(terrain[possible.location[i, 1], possible.location[1, 2]] <= )
-      #height <- c(height, i)
-  #}
+  height <- numeric()
+  for(i in 1:nrow(possible.location)){
+    if(plants[row,col] == p1)
+      if(terrain[possible.location[i, 1], possible.location[1, 2]] <= quant.p1)
+        height <- c(height, i)
+    if(plants[row,col] == p2)
+      if(terrain[possible.location[i, 1], possible.location[1, 2]] <= quant.p2)
+        height <- c(height, i)
+    if(plants[row,col] == p3)
+      if(terrain[possible.location[i, 1], possible.location[1, 2]] <= quant.p3)
+        height <- c(height, i)
+    if(plants[row,col] == p4)
+      if(terrain[possible.location[i, 1], possible.location[1, 2]] <= quant.p4)
+        height <- c(height, i)
+    if(plants[row,col] == p5)
+      if(terrain[possible.location[i, 1], possible.location[1, 2]] <= quant.p5)
+        height <- c(height, i)
+  }
 
   if(length(height) != 0)
     possible.location <- possible.location[- height, ]
@@ -66,7 +80,7 @@ new.loc.plant <- function(plants, row, col, terrain){
   }
 }
 
-# ===========================================================================================================================================
+# ===========================================================================================================
 plant.timestep <- function(plants, terrain, info.plant){
 
     survive <- function(cell){
