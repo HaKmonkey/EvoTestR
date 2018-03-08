@@ -4,10 +4,8 @@ evo.test <- function(timesteps = 50, terrain, herbivore.health = c(100), herbivo
   # create plants array
   plant.generation <- array(data = "", dim = c(nrow(terrain), ncol(terrain), (timesteps + 1)))
 
-  # possibly move this to plant setup function (again)
-  # look at using reference classes for plants' enzymes
   # plants are randomly assigned the three enzymes that digest them
-  # the order of the enzymes gives the amount of health returned
+  # the order of the enzymes gives the amount of health returned to the herbivore
   Enz <- c('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p')
 
   for(i in 1:3){
@@ -46,6 +44,9 @@ evo.test <- function(timesteps = 50, terrain, herbivore.health = c(100), herbivo
   choice.p3 <- c("", p3)
   choice.p4 <- c("", p4)
   choice.p5 <- c("", p5)
+
+  # createing a log file for the herbivore information
+  file.create("log.csv")
 
   # creating herbivore array
   herbivore.generation <- array(data = 0, dim = c(nrow(terrain), ncol(terrain), (timesteps + 1)))
