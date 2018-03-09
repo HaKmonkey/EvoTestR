@@ -11,22 +11,22 @@ evo.test <- function(timesteps = 50, terrain, herbivore.health = c(100), herbivo
   for(i in 1:3){
     temp <- sample(Enz, size = 3, replace = FALSE)
   }
-  p1 <- new.plant()
+  p1 <- new.plant(temp[1], temp[2], temp[3])
 
   for(i in 1:3){
     temp <- sample(Enz, size = 3, replace = FALSE)
   }
-  p2 <- new.plant()
+  p2 <- new.plant(temp[1], temp[2], temp[3])
 
   for(i in 1:3){
     temp <- sample(Enz, size = 3, replace = FALSE)
   }
-  p3 <- new.plant()
+  p3 <- new.plant(temp[1], temp[2], temp[3])
 
   for(i in 1:3){
     temp <- sample(Enz, size = 3, replace = FALSE)
   }
-  p4 <- new.plant()
+  p4 <- new.plant(temp[1], temp[2], temp[3])
 
   for(i in 1:3){
     temp <- sample(Enz, size = 3, replace = FALSE)
@@ -45,8 +45,25 @@ evo.test <- function(timesteps = 50, terrain, herbivore.health = c(100), herbivo
   choice.p4 <- c("", p4)
   choice.p5 <- c("", p5)
 
-  # createing a log file for the herbivore information
-  file.create("log.csv")
+  # createing a log files
+  file.create(file = "plant_enzymes.csv", row.names = "")
+  a <- data.frame('enz1', 'enz2', 'enz3')
+  b <- data.frame(p1[1], p1[2], p1[3])
+  c <- data.frame(p2[1], p2[2], p2[3])
+  d <- data.frame(p3[1], p3[2], p3[3])
+  e <- data.frame(p4[1], p4[2], p4[3])
+  f <- data.frame(p5[1], p5[2], p5[3])
+  write.table(a, file = "plant_enzymes.csv", sep = ",", append = TRUE, quote = FALSE, col.names = FALSE, row.names = FALSE)
+  write.table(b, file = "plant_enzymes.csv", sep = ",", append = TRUE, quote = FALSE, col.names = FALSE, row.names = FALSE)
+  write.table(c, file = "plant_enzymes.csv", sep = ",", append = TRUE, quote = FALSE, col.names = FALSE, row.names = FALSE)
+  write.table(d, file = "plant_enzymes.csv", sep = ",", append = TRUE, quote = FALSE, col.names = FALSE, row.names = FALSE)
+  write.table(e, file = "plant_enzymes.csv", sep = ",", append = TRUE, quote = FALSE, col.names = FALSE, row.names = FALSE)
+  write.table(f, file = "plant_enzymes.csv", sep = ",", append = TRUE, quote = FALSE, col.names = FALSE, row.names = FALSE)
+
+
+  file.create("herbivore_log.csv")
+  x <- data.frame('ID', 'health', 'age', 'b1', 'b2', 'b3', 'b4', 'b5', 'b6', 'b7', 'b8', 'b9', 'b10', 'b11', 'b12', 'b13', 'b14', 'b15', 'b16', 'b17', 'b18', 'b19', 'b20')
+  write.table(x, file = "herbivore_log.csv", sep = ",", append = TRUE, quote = FALSE, col.names = FALSE, row.names = FALSE)
 
   # creating herbivore array
   herbivore.generation <- array(data = 0, dim = c(nrow(terrain), ncol(terrain), (timesteps + 1)))
