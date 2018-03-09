@@ -1,6 +1,11 @@
+# return a new herbivore (list)
+# use the ID (output[[1]]) to hold the position in the herbivore matrix
+# get and manipulate information from the .csv by ID (row)
 new.herbivore <- function(ID, health, age, b1, b2, b3, b4, b5, b6, b7, b8, b9, b10, b11, b12, b13, b14, b15, b16, b17, b18, b19, b20){
-  output <- data.frame(ID = ID, health = health, age = age, b1 = b1, b2 = b2, b3 = b3, b4 = b4, b5 = b5, b6 = b6, b7 = b7, b8 = b8, b9 = b9, b10 = b10, b11 = b11, b12 = b12, b13 = b13, b14 = b14, b15 = b15, b16 = b16, b17 = b17, b18 = b18, b19 = b19, b20 = b20)
-  class(output) <- "herbivore"
+  output <- list(ID = ID, health = health, age = age, b1 = b1, b2 = b2, b3 = b3, b4 = b4, b5 = b5, b6 = b6, b7 = b7, b8 = b8, b9 = b9, b10 = b10, b11 = b11, b12 = b12, b13 = b13, b14 = b14, b15 = b15, b16 = b16, b17 = b17, b18 = b18, b19 = b19, b20 = b20)
+  x <- as.data.frame(output)
+  write.table(x, file = "herbivore_log.csv", sep = ",", append = TRUE, quote = FALSE, col.names = FALSE, row.names = FALSE)
+  class(output)
   return(output)
 }
 # ==========================================================================================================
