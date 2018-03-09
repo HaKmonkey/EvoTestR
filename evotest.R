@@ -41,6 +41,7 @@ evo.test <- function(timesteps = 50, terrain, herbivore.health = 100, herbivore.
   p5 <- new.plant(temp[1], temp[2], temp[3])
   possible.enz <- c(possible.enz, temp[1], temp[2], temp[3])
 
+  # creates count values for present enzymes
   na = nb = nc = nd = ne = nf = ng = nh = ni = nj = nk = nl = nm = nn = no = np = 0
   for(i in 1:15){
     if(possible.enz[i] == 'a'){
@@ -84,10 +85,8 @@ evo.test <- function(timesteps = 50, terrain, herbivore.health = 100, herbivore.
   to.use <- c()
   for(i in max(enz.count):1){
     temp <- which(enz.count %in% i)
-    print(temp)
     to.use <- c(to.use, position[temp])
   }
-
 
   # quantiles for terrain height that constrain plant placement
   quant.p1 <- quantile(terrain, probs = .22)
@@ -101,7 +100,7 @@ evo.test <- function(timesteps = 50, terrain, herbivore.health = 100, herbivore.
   choice.p4 <- c("", p4)
   choice.p5 <- c("", p5)
 
-  # createing a log files
+  # createing a log file for plants' enzymes
   file.create(file = "plant_enzymes.csv")
   a <- data.frame('enz1', 'enz2', 'enz3')
   b <- data.frame(p1[1], p1[2], p1[3])
@@ -116,7 +115,7 @@ evo.test <- function(timesteps = 50, terrain, herbivore.health = 100, herbivore.
   write.table(e, file = "plant_enzymes.csv", sep = ",", append = TRUE, quote = FALSE, col.names = FALSE, row.names = FALSE)
   write.table(f, file = "plant_enzymes.csv", sep = ",", append = TRUE, quote = FALSE, col.names = FALSE, row.names = FALSE)
 
-
+  # creating a log file to keep track of herbivores
   file.create("herbivore_log.csv")
   x <- data.frame('ID', 'health', 'age', 'b1', 'b2', 'b3', 'b4', 'b5', 'b6', 'b7', 'b8', 'b9', 'b10', 'b11', 'b12', 'b13', 'b14', 'b15', 'b16', 'b17', 'b18', 'b19', 'b20')
   write.table(x, file = "herbivore_log.csv", sep = ",", append = TRUE, quote = FALSE, col.names = FALSE, row.names = FALSE)
