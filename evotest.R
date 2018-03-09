@@ -1,4 +1,4 @@
-evo.test <- function(timesteps = 50, terrain, herbivore.health = c(100), herbivore.age = c(50), herb.frac = c(.1), herb.repro = c(.4), kill = c(.1)){
+evo.test <- function(timesteps = 50, terrain, herbivore.health = 100, herbivore.age = 50, herbivore.frac = .1, herb.repro = .5, kill = .1){
   info.herb <- setup.herbivores(herbivore.state, eat, kill, herb.repro, herb.frac)
 
   # create plants array
@@ -67,8 +67,6 @@ evo.test <- function(timesteps = 50, terrain, herbivore.health = c(100), herbivo
 
   # creating herbivore array
   herbivore.generation <- array(data = 0, dim = c(nrow(terrain), ncol(terrain), (timesteps + 1)))
-  herbivores <- c(0, herbivore.health)
-  p.herb <- c((1 - sum(herb.frac)), herb.frac)
 
   # populating initial plant and herbivore timestep (at 0)
   for(r in 1:nrow(terrain)){
@@ -89,7 +87,16 @@ evo.test <- function(timesteps = 50, terrain, herbivore.health = c(100), herbivo
           plant.generation[r, c, 1] <- sample(choice.p4, size = 1, replace = FALSE, prob = .5)
         }else if(terrain[r,c] <= quant.p5)
           plant.generation[r, c, 1] <- sample(choice.p5, size = 1, replace = FALSE, prob = .5)
-        herbivore.generation[r, c, 1] <- sample(herbivores, size = 1, replace = FALSE, prob = p.herb)
+        ## change how herbivores are places in the environment
+        if(rnrom(1) <= herbivore.frac){
+          ID = 1
+          ## randomly select 3 enzymes that are present in any plants and randomly select the 4th enzyme from any of the remaining combinations
+          herbivore.generation[r, c, 1] <- new.herbivore(ID, herbivore.health, herbivore.age, )
+          ID += 1
+        }
+        else{
+          herbivore.generation[r, c, 1] <- 0
+        }
       }
     }
   }
