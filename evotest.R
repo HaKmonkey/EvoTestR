@@ -6,32 +6,88 @@ evo.test <- function(timesteps = 50, terrain, herbivore.health = 100, herbivore.
 
   # plants are randomly assigned the three enzymes that digest them
   # the order of the enzymes gives the amount of health returned to the herbivore
-  Enz <- c('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p')
+  enz <- c('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p')
+
+  possible.enz <- NA
 
   for(i in 1:3){
-    temp <- sample(Enz, size = 3, replace = FALSE)
+    temp <- sample(enz, size = 3, replace = FALSE)
   }
   p1 <- new.plant(temp[1], temp[2], temp[3])
+  possible.enz <- c(temp[1], temp[2], temp[3])
 
   for(i in 1:3){
-    temp <- sample(Enz, size = 3, replace = FALSE)
+    temp <- sample(enz, size = 3, replace = FALSE)
   }
   p2 <- new.plant(temp[1], temp[2], temp[3])
+  possible.enz <- c(possible.enz, temp[1], temp[2], temp[3])
+
 
   for(i in 1:3){
-    temp <- sample(Enz, size = 3, replace = FALSE)
+    temp <- sample(enz, size = 3, replace = FALSE)
   }
   p3 <- new.plant(temp[1], temp[2], temp[3])
+  possible.enz <- c(possible.enz, temp[1], temp[2], temp[3])
 
   for(i in 1:3){
-    temp <- sample(Enz, size = 3, replace = FALSE)
+    temp <- sample(enz, size = 3, replace = FALSE)
   }
   p4 <- new.plant(temp[1], temp[2], temp[3])
+  possible.enz <- c(possible.enz, temp[1], temp[2], temp[3])
 
   for(i in 1:3){
-    temp <- sample(Enz, size = 3, replace = FALSE)
+    temp <- sample(enz, size = 3, replace = FALSE)
   }
   p5 <- new.plant(temp[1], temp[2], temp[3])
+  possible.enz <- c(possible.enz, temp[1], temp[2], temp[3])
+
+  na = nb = nc = nd = ne = nf = ng = nh = ni = nj = nk = nl = nm = nn = no = np = 0
+  for(i in 1:15){
+    if(possible.enz[i] == 'a'){
+      na = na + 1
+    }else if(possible.enz[i] == 'b'){
+      nb = nb + 1
+    }else if(possible.enz[i] == 'c'){
+      nc = nc + 1
+    }else if(possible.enz[i] == 'd'){
+      nd = nd + 1
+    }else if(possible.enz[i] == 'e'){
+      ne = ne + 1
+    }else if(possible.enz[i] == 'f'){
+      nf = nf + 1
+    }else if(possible.enz[i] == 'g'){
+      ng = ng + 1
+    }else if(possible.enz[i] == 'h'){
+      nh = nh + 1
+    }else if(possible.enz[i] == 'i'){
+      ni = ni + 1
+    }else if(possible.enz[i] == 'j'){
+      nj = nj + 1
+    }else if(possible.enz[i] == 'k'){
+      nk = nk + 1
+    }else if(possible.enz[i] == 'l'){
+      nl = nl + 1
+    }else if(possible.enz[i] == 'm'){
+      nm = nm + 1
+    }else if(possible.enz[i] == 'n'){
+      nn = nn + 1
+    }else if(possible.enz[i] == 'o'){
+      no = no + 1
+    }else{
+      np = np + 1
+    }
+  }
+
+  # generates an ordered list of the most used to least used enzymes, will select the first 3 then 1 random one after
+  position <- c('na', 'nb', 'nc', 'nd', 'ne', 'nf', 'ng', 'nh', 'ni', 'nj', 'nk', 'nl', 'nm', 'nn', 'no', 'np')
+  enz.count <- c(na, nb, nc, nd, ne, nf, ng, nh, ni, nj, nk, nl, nm, nn, no, np)
+  to.use <- c()
+  for(i in max(enz.count):1){
+    temp <- which(enz.count %in% i)
+    print(temp)
+    to.use <- c(to.use, position[temp])
+  }
+
 
   # quantiles for terrain height that constrain plant placement
   quant.p1 <- quantile(terrain, probs = .22)
@@ -46,7 +102,7 @@ evo.test <- function(timesteps = 50, terrain, herbivore.health = 100, herbivore.
   choice.p5 <- c("", p5)
 
   # createing a log files
-  file.create(file = "plant_enzymes.csv", row.names = "")
+  file.create(file = "plant_enzymes.csv")
   a <- data.frame('enz1', 'enz2', 'enz3')
   b <- data.frame(p1[1], p1[2], p1[3])
   c <- data.frame(p2[1], p2[2], p2[3])
@@ -90,7 +146,8 @@ evo.test <- function(timesteps = 50, terrain, herbivore.health = 100, herbivore.
         ## change how herbivores are places in the environment
         if(rnrom(1) <= herbivore.frac){
           ID = 1
-          ## randomly select 3 enzymes that are present in any plants and randomly select the 4th enzyme from any of the remaining combinations
+          ## select 3 most common enzymes that are present in any plants and randomly select the 4th enzyme from any of the remaining combinations
+
           herbivore.generation[r, c, 1] <- new.herbivore(ID, herbivore.health, herbivore.age, )
           ID += 1
         }
