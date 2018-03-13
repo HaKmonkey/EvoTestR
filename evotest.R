@@ -8,8 +8,6 @@ evo.test <- function(timesteps = 50, terrain, herbivore.health = 100, herbivore.
   # the order of the enzymes gives the amount of health returned to the herbivore
   enz <- c('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p')
 
-  possible.enz <- NA
-
   for(i in 1:3){
     temp <- sample(enz, size = 3, replace = FALSE)
   }
@@ -133,7 +131,6 @@ evo.test <- function(timesteps = 50, terrain, herbivore.health = 100, herbivore.
         herbivore.generation[r, c, 1] <- NA
       }else{
         # make sure plants are not placed outside of their quantile for height
-        # setting probabilites now
         if(terrain[r,c] <= quant.p1){
           plant.generation[r, c, 1] <- sample(choice.p1, size = 1, replace = FALSE, prob = .5)
         }else if(terrain[r,c] <= quant.p2){
