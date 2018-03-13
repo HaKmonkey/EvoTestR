@@ -122,6 +122,8 @@ evo.test <- function(timesteps = 50, terrain, herbivore.health = 100, herbivore.
 
   # creating herbivore array
   herbivore.generation <- array(data = 0, dim = c(nrow(terrain), ncol(terrain), (timesteps + 1)))
+  selected <- to.dna(to.use[1:3])
+  remainder <- setdiff(enz, to.use[1:3])
 
   # populating initial plant and herbivore timestep (at 0)
   for(r in 1:nrow(terrain)){
@@ -146,8 +148,12 @@ evo.test <- function(timesteps = 50, terrain, herbivore.health = 100, herbivore.
         if(rnrom(1) <= herbivore.frac){
           ID = 1
           ## select 3 most common enzymes that are present in any plants and randomly select the 4th enzyme from any of the remaining combinations
+          rand.enz <- sample(1, remainder)
+          rand.enz <- to.dna(rand.enz)
+          init.bases <- c(selected, rand.enz)
 
-          herbivore.generation[r, c, 1] <- new.herbivore(ID, herbivore.health, herbivore.age, )
+          # have to test if this would work...
+          herbivore.generation[r, c, 1] <- new.herbivore(ID, herbivore.health, herbivore.age, init.bases)
           ID += 1
         }
         else{
