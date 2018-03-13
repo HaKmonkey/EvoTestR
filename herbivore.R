@@ -22,7 +22,7 @@ new.loc.herb <- function(mat, row, col){
   if(length(out) != 0)
     possible.location <- possible.location[- out, ]
 
-  # get rid of locations that are water ***
+  # get rid of locations that are water
   water <- numeric()
   for(i in 1:nrow(possible.location)){
     if(is.na(mat[possible.location[i, 1], possible.location[i, 2]]))
@@ -59,22 +59,25 @@ new.loc.herb <- function(mat, row, col){
   }
 }
 # ==========================================================================================================
-herbivore.timestep <- function(herbivores, plants, terrain, info.herb){
+herbivore.timestep <- function(herbivores, plants, terrain, herbivore.health, herbivore.age, herbivore.frac, herbivore.repro, kill, ID){
     kill <- function(plants, row, col){
-    	if(runif(1) <= info.herb$kill)
+    	if(runif(1) <= kill)
         	plants[row, col] <- ""
         return(plants)
     }
 
     reproduce.herbivore <- function(herbivores, row, col){
-      if(runif(1) <= info.herb$herb.repro){
+      if(runif(1) <= herbivore.repro){
       	new.location <- new.loc.herb(herbivores, row, col)
-      	herbivores[new.location[1], new.location[2]] <- 5
+      	herbivores[new.location[1], new.location[2]] <- ID
+        new.herbivore(ID, herbivore.health, herbivore.age, ) # have to find a way to make bases heritable
+        ID <- ID + 1
       	return(herbivores)
       }
     }
 
-    eat <- function(herbivores, plants, row, col, info.herb){
+    # have to figure out how to pull herbivore health from log file (might make a matrix with the information)
+    eat <- function(herbivores, plants, row, col, ){
       p <- which(info.herb$herbivore.state == herbivores[row, col])
       prob.eat <- c(info.herb$eat[p], 1 - info.herb$eat[p])
       if(sample(c(TRUE, FALSE), 1, replace = FALSE, prob = prob.eat)){

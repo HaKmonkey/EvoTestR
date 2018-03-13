@@ -1,4 +1,4 @@
-evo.test <- function(timesteps = 50, terrain, herbivore.health = 100, herbivore.age = 50, herbivore.frac = .1, herb.repro = .5, kill = .1){
+evo.test <- function(timesteps = 50, terrain, herbivore.health = 100, herbivore.age = 50, herbivore.frac = .1, herbivore.repro = .5, kill = .1){
   info.herb <- setup.herbivores(herbivore.state, eat, kill, herb.repro, herb.frac)
 
   # create plants array
@@ -122,6 +122,7 @@ evo.test <- function(timesteps = 50, terrain, herbivore.health = 100, herbivore.
   herbivore.generation <- array(data = 0, dim = c(nrow(terrain), ncol(terrain), (timesteps + 1)))
   selected <- to.dna(to.use[1:3])
   remainder <- setdiff(enz, to.use[1:3])
+  ID = 1 # identification for each herbivore made
 
   # populating initial plant and herbivore timestep (at 0)
   for(r in 1:nrow(terrain)){
@@ -141,17 +142,14 @@ evo.test <- function(timesteps = 50, terrain, herbivore.health = 100, herbivore.
           plant.generation[r, c, 1] <- sample(choice.p4, size = 1, replace = FALSE, prob = .5)
         }else if(terrain[r,c] <= quant.p5)
           plant.generation[r, c, 1] <- sample(choice.p5, size = 1, replace = FALSE, prob = .5)
-        ## change how herbivores are places in the environment
         if(rnrom(1) <= herbivore.frac){
-          ID = 1
           ## select 3 most common enzymes that are present in any plants and randomly select the 4th enzyme from any of the remaining combinations
           rand.enz <- sample(1, remainder)
           rand.enz <- to.dna(rand.enz)
           init.bases <- c(selected, rand.enz)
 
-          # have to test if this would work...
-          herbivore.generation[r, c, 1] <- new.herbivore(ID, herbivore.health, herbivore.age, init.bases)
-          ID += 1
+          herbivore.generation[r, c, 1] <- new.herbivore(ID, herbivore.health, herbivore.age, init.bases[1], init.bases[2], init.bases[3], init.bases[4], init.bases[5], init.bases[6], init.bases[7], init.bases[8], init.bases[9], init.bases[10], init.bases[11], init.bases[12], init.bases[13], init.bases[14], init.bases[15], init.bases[16], init.bases[17], init.bases[18], init.bases[19], init.bases[20],)
+          ID <- ID + 1
         }
         else{
           herbivore.generation[r, c, 1] <- 0
@@ -163,7 +161,7 @@ evo.test <- function(timesteps = 50, terrain, herbivore.health = 100, herbivore.
   # run each timestep of the simulation
   for(i in seq(2, timesteps + 1)){
     plant.generation[, , i] <- plant.timestep(plant.generation[, , (i - 1)], terrain)
-    eco <- herbivore.timestep(herbivore.generation[, , (i - 1)], plant.generation[, , i], terrain, info.herb)
+    eco <- herbivore.timestep(herbivore.generation[, , (i - 1)], plant.generation[, , i], terrain, herbivore.health, herbivore.age, herbivore.frac, herbivore.repro, kill, ID)
     herbivore.generation[, , i] <- eco[[1]]
     plant.generation[, , i] <- eco[[2]]
   }
