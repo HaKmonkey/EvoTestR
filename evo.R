@@ -25,6 +25,7 @@ to.dna <- function(x, possbible.enz){
     }
     if(as.character(to.enz(dna.list[1,])) %in% possible.enz){
       bases <- c(bases, dna.list[1, ])
+      temp <- temp + 1
     }
   }
 }
