@@ -60,26 +60,27 @@ new.loc.herb <- function(mat, row, col){
   }
 }
 # ==========================================================================================================
-herbivore.timestep <- function(herbivores, plants, terrain, herbivore.health, herbivore.age, herbivore.frac, herbivore.repro, kill, ID){
-    kill <- function(plants, row, col){
-    	if(runif(1) <= kill)
+herbivore.timestep <- function(herbivores, plants, terrain, info.herb, herbivore.log, ID){
+    kill <- function(plants, row, col, info.herb){
+    	if(runif(1) <= info.herb$kill)
         	plants[row, col] <- ""
         return(plants)
     }
 
-    reproduce.herbivore <- function(herbivores, row, col){
-      if(runif(1) <= herbivore.repro){
+    reproduce.herbivore <- function(herbivores, row, col, info.herb){
+      if(runif(1) <= info.herb$herbivore.repro){
       	new.location <- new.loc.herb(herbivores, row, col)
       	herbivores[new.location[1], new.location[2]] <- ID
-        new.herbivore(ID, herbivore.health, herbivore.age, ) # have to find a way to make bases heritable
+        B <- herbivore.log[ID-1, ]
+        new.herbivore(ID, info.herb$herbivore.health, info.herb$herbivore.age, B[, b1], B[, b2], B[, b3], B[, b4], B[, b5], B[, b6], B[, b7], B[, b8], B[, b9], B[, b10], B[, b11], B[, b12], B[, b13], B[, b14], B[, b15], B[, b16], B[, b17], B[, b18], B[, b19], B[, b20]) # have to find a way to make bases heritable
         ID <- ID + 1
       	return(herbivores)
       }
     }
 
     # have to figure out how to pull herbivore health from log file (might make a matrix with the information)
-    eat <- function(herbivores, plants, row, col, ){
-      p <- which(info.herb$herbivore.state == herbivores[row, col])
+    eat <- function(herbivores, plants, row, col, info.herb){
+      p <- which(info.herb$herbivore.health == herbivores[row, col])
       prob.eat <- c(info.herb$eat[p], 1 - info.herb$eat[p])
       if(sample(c(TRUE, FALSE), 1, replace = FALSE, prob = prob.eat)){
       	herbivores[row, col] <- 5
