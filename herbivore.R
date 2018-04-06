@@ -2,13 +2,18 @@
 # use the ID (output[[1]]) to hold the position in the herbivore matrix
 # get and manipulate information from the .csv by ID (row)
 new.herbivore <- function(herbivore.log, ID, health, age, b1, b2, b3, b4, b5, b6, b7, b8, b9, b10, b11, b12, b13, b14, b15, b16, b17, b18, b19, b20){
-  output <- list(ID = ID, health = health, age = age, b1 = b1, b2 = b2, b3 = b3, b4 = b4, b5 = b5, b6 = b6, b7 = b7, b8 = b8, b9 = b9, b10 = b10, b11 = b11, b12 = b12, b13 = b13, b14 = b14, b15 = b15, b16 = b16, b17 = b17, b18 = b18, b19 = b19, b20 = b20)
-  x <- matrix(output, nrow = 1, ncol = 23)
-  ##write.table(x, file = "herbivore_log.csv", sep = ",", append = TRUE, quote = FALSE, col.names = FALSE, row.names = FALSE)
-  rbind(herbivore.log, x)
-  ##class(output)
-  ##return(output)
+  x <- matrix(c(ID, health, age, b1, b2, b3, b4, b5, b6, b7, b8, b9, b10, b11, b12, b13, b14, b15, b16, b17, b18, b19, b20), nrow = 1, ncol = 23)
+  herbivore.log <- rbind(herbivore.log, x)
+  return(herbivore.log)
 }
+
+
+herbivore.log <- new.herbivore(herbivore.log, 1, 100, 50, 'A', 'A', 'A', 'A', 'A', 'T', 'T', 'T', 'T', 'T', 'G', 'G', 'G', 'G', 'G', 'C', 'C', 'C', 'C', 'C')
+
+
+temp <- herbivore.log[which(herbivore.log[, 'ID'] == 1), ] # replace number with i in a loop
+temp['age'] ## example
+temp['health'] ## example
 # ==========================================================================================================
 new.loc.herb <- function(mat, row, col){
   possible.location <- as.matrix(expand.grid(row + c(-1, 0, 1), col + c(-1, 0, 1)))
@@ -60,32 +65,35 @@ new.loc.herb <- function(mat, row, col){
   }
 }
 # ==========================================================================================================
-herbivore.timestep <- function(herbivores, plants, terrain, info.herb, herbivore.log, ID){
-    kill <- function(plants, row, col, info.herb){
-    	if(runif(1) <= info.herb$kill)
+herbivore.timestep <- function(herbivores, plants, terrain, herbivore.log, ID, kill, herbivore.health, herbivore.age, herbivore.repro){
+    kill <- function(plants, row, col){
+    	if(runif(1) <= kill)
         	plants[row, col] <- ""
         return(plants)
     }
 
-    reproduce.herbivore <- function(herbivores, row, col, info.herb){
-      if(runif(1) <= info.herb$herbivore.repro){
+    reproduce.herbivore <- function(herbivores, row, col, herbivore.log, herbivore.health, herbivore.age, herbivore.repro, ID){
+      if(runif(1) <= herbivore.repro){
       	new.location <- new.loc.herb(herbivores, row, col)
-      	herbivores[new.location[1], new.location[2]] <- ID
-        B <- herbivore.log[ID-1, ]
-        new.herbivore(ID, info.herb$herbivore.health, info.herb$herbivore.age, B[, b1], B[, b2], B[, b3], B[, b4], B[, b5], B[, b6], B[, b7], B[, b8], B[, b9], B[, b10], B[, b11], B[, b12], B[, b13], B[, b14], B[, b15], B[, b16], B[, b17], B[, b18], B[, b19], B[, b20]) # have to find a way to make bases heritable
+        temp <- herbivore.log[which(herbivore.log[, 'ID'] == ID), ]
         ID <- ID + 1
+      	herbivores[new.location[1], new.location[2]] <- ID
+        # will this even work? may have to return the herbivore.log as well and adjust how information is accessed in evotest.R
+        herbivore.log <- new.herbivore(ID, herbivore.health, herbivore.age, temp['b1'], temp['b2'], temp['b3'], temp['b4'], temp['b5'], temp['b6'], temp['b7'], temp['b8'], temp['b9'], temp['b10'], temp['b11'], temp['b12'], temp['b13'], temp['b14'], temp['b15'], temp['b16'], temp['b17'], temp['b18'], temp['b19'], temp['b20'])
       	return(herbivores)
       }
     }
 
-    # have to figure out how to pull herbivore health from log file (might make a matrix with the information)
-    eat <- function(herbivores, plants, row, col, info.herb){
-      p <- which(info.herb$herbivore.health == herbivores[row, col])
-      prob.eat <- c(info.herb$eat[p], 1 - info.herb$eat[p])
-      if(sample(c(TRUE, FALSE), 1, replace = FALSE, prob = prob.eat)){
-      	herbivores[row, col] <- 5
-      	kill(plants, row, col, info.herb$kill)
-      	reproduce.herbivore(herbivores, row, col)
+    ## modifying eat function so that it is based on health
+    eat <- function(herbivores, plants, row, col, kill, herbivore.log, ID){
+      temp <- herbivore.log[which(herbivore.log[, 'ID'] == ID), ]
+      prob <- c(1 - as.int(temp['health'])/100, as.int(temp['health'])/100)
+      if(sample(c(TRUE, FALSE), 1, replace = FALSE, prob = prob)){
+      	## herbivores[row, col] <- 5
+        herb.id <- herbivores[r, c]
+        ## health is based on plaaaaaaaaants!
+        temp2 <- herbivore.log[which(herbivore.log[, 'ID'] == herb.id), ]
+      	kill(plants, row, col, kill)
       }else{
       	move(herbivores, row, col)
       }
@@ -101,8 +109,13 @@ herbivore.timestep <- function(herbivores, plants, terrain, info.herb, herbivore
 
     for(r in 1:nrow(terrain)){
       for(c in 1:ncol(terrain)){
-        if(herbivores[r, c] != 0 && is.na(herbivores[r,c]) == FALSE){
+        if(herbivores[r, c] != 0 && is.na(herbivores[r, c]) == FALSE){
           if(is.na(plants[r, c]) == FALSE && plants[r, c] != ""){
+            herb.id <- herbivores[r, c]
+            temp <- herbivore.log[which(herbivore.log[, 'ID'] == herb.id), ]
+            if(as.int(temp['health']) >= 50){
+              reproduce.herbivore(herbivores, r, c, herbivore.log, herbivore.health, herbivore.age, herbivore.repro, ID)
+            }
             eat(herbivores, plants, r, c, info.herb)
           }else{
             move(herbivores, r, c)

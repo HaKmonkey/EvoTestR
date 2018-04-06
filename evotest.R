@@ -1,5 +1,5 @@
 evo.test <- function(timesteps = 50, terrain, herbivore.health = 100, herbivore.age = 50, herbivore.frac = .1, herbivore.repro = .5, kill = .1){
-  info.herb <- setup.herbivores(herbivore.health, herbivore.age, herbivore.frac, herbivore.repro, kill)
+  #info.herb <- setup.herbivores(herbivore.health, herbivore.age, herbivore.frac, herbivore.repro, kill)
 
   # create plants array
   plant.generation <- array(data = "", dim = c(nrow(terrain), ncol(terrain), (timesteps + 1)))
@@ -113,11 +113,9 @@ evo.test <- function(timesteps = 50, terrain, herbivore.health = 100, herbivore.
   write.table(e, file = "plant_enzymes.csv", sep = ",", append = TRUE, quote = FALSE, col.names = FALSE, row.names = FALSE)
   write.table(f, file = "plant_enzymes.csv", sep = ",", append = TRUE, quote = FALSE, col.names = FALSE, row.names = FALSE)
 
-  # creating a log file to keep track of herbivores
-  ## going to change this into a matrix
-  ##file.create("herbivore_log.csv")
-  ##x <- data.frame('ID', 'health', 'age', 'b1', 'b2', 'b3', 'b4', 'b5', 'b6', 'b7', 'b8', 'b9', 'b10', 'b11', 'b12', 'b13', 'b14', 'b15', 'b16', 'b17', 'b18', 'b19', 'b20')
-  ##write.table(x, file = "herbivore_log.csv", sep = ",", append = TRUE, quote = FALSE, col.names = FALSE, row.names = FALSE)
+  # creating a log matrix to keep track of herbivores
+  ## file.create("herbivore_log.csv")
+  ## write.table(x, file = "herbivore_log.csv", sep = ",", append = TRUE, quote = FALSE, col.names = FALSE, row.names = FALSE)
 
   matrix.info <- c('ID', 'health', 'age', 'b1', 'b2', 'b3', 'b4', 'b5', 'b6', 'b7', 'b8', 'b9', 'b10', 'b11', 'b12', 'b13', 'b14', 'b15', 'b16', 'b17', 'b18', 'b19', 'b20')
   herbivore.log <- matrix(nrow = 1, ncol = 23) ## will use rbind to add new herbivores to the matrix
