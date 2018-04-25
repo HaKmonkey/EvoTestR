@@ -64,9 +64,8 @@ terrain <- terrain() # example
 ##### end of terrain (know for sure that this function works) #####
 
 new.plant <- function(enz1, enz2, enz3, val1 = 25, val2 = 12.5, val3 = 6.25){
-  output <- list(enz1 = enz1, enz2 = enz2, enz3 = enz3, val1 = val1,  val2 = val2, val3 = val3)
-  class(output) <- "plant"
-  return(output)
+  output <- matrix(c(enz1, enz2, enz3, val1, val2, val3), nrow = 3, ncol = 2)
+	return(output)
 }
 
 ##### end of new.plant (this works, but creates a list. Will have to make sure there is no error in evo.test)
@@ -77,7 +76,7 @@ new.loc.plant <- function(plants, row, col, terrain){
   # get rid of the points outside of the matrix
   out <- numeric()
   for(i in 1:nrow(possible.location)){
-    if(possible.location[i, 1] > nrow(plants) || possible.location[i, 2] > nrow(plants) || possible.location[i, 1] == 0 || possible.location[i, 2] == 0)
+    if(possible.location[i, 1] > nrow(plants) || possible.location[i, 2] > nrow(plants) || possible.location[i, 1] == 0 || possible.location[i, 2] == 0 && class(possible.location) == "matrix")
       out <- c(out, i)
   }
 
@@ -87,7 +86,7 @@ new.loc.plant <- function(plants, row, col, terrain){
   # get rid of locations that are water ***
   water <- numeric()
   for(i in 1:nrow(possible.location)){
-    if(is.na(plants[possible.location[i, 1], possible.location[i, 2]]))
+    if(is.na(plants[possible.location[i, 1], possible.location[i, 2]]) && class(possible.location) == "matrix")
       water <- c(water, i)
   }
 
@@ -96,48 +95,61 @@ new.loc.plant <- function(plants, row, col, terrain){
 
   # get rid of values outside of the height limit
   # quantiles for terrain height that constrain plant placement
-  quant.p1 <- quantile(terrain, probs = .22)
-  quant.p2 <- quantile(terrain, probs = seq(.2, .42))
-  quant.p3 <- quantile(terrain, probs = seq(.4, .62))
-  quant.p4 <- quantile(terrain, probs = seq(.6, .82))
-  quant.p5 <- quantile(terrain, probs = seq(.8, 1))
+  quant.p1 <- quantile(terrain, probs = .22, na.rm = TRUE)
+  quant.p2 <- quantile(terrain, probs = seq(.2, .42), na.rm = TRUE)
+  quant.p3 <- quantile(terrain, probs = seq(.4, .62), na.rm = TRUE)
+  quant.p4 <- quantile(terrain, probs = seq(.6, .82), na.rm = TRUE)
+  quant.p5 <- quantile(terrain, probs = seq(.8, 1), na.rm = TRUE)
 
+	print('height')
+	print(nrow(possible.location))
+	print(possible.location)
+	print(dim(possible.location))
+	print(length(possible.location))
   height <- numeric()
   for(i in 1:nrow(possible.location)){
-    if(plants[row,col] == p1)
-      if(terrain[possible.location[i, 1], possible.location[1, 2]] <= quant.p1)
+    if(plants[row,col] == 'p1' && class(possible.location) == "matrix" && terrain[possible.location[i, 1], possible.location[i, 2]] <= as.numeric(quant.p1))
+      height <- c(height, i)
+    if(plants[row,col] == 'p2' && class(possible.location) == "matrix" && terrain[possible.location[i, 1], possible.location[i, 2]] <= as.numeric(quant.p2))
+      height <- c(height, i)
+    if(plants[row,col] == 'p3' && class(possible.location) == "matrix" && terrain[possible.location[i, 1], possible.location[i, 2]] <= as.numeric(quant.p3))
         height <- c(height, i)
-    if(plants[row,col] == p2)
-      if(terrain[possible.location[i, 1], possible.location[1, 2]] <= quant.p2)
-        height <- c(height, i)
-    if(plants[row,col] == p3)
-      if(terrain[possible.location[i, 1], possible.location[1, 2]] <= quant.p3)
-        height <- c(height, i)
-    if(plants[row,col] == p4)
-      if(terrain[possible.location[i, 1], possible.location[1, 2]] <= quant.p4)
-        height <- c(height, i)
-    if(plants[row,col] == p5)
-      if(terrain[possible.location[i, 1], possible.location[1, 2]] <= quant.p5)
+    if(plants[row,col] == 'p4' && class(possible.location) == "matrix" && terrain[possible.location[i, 1], possible.location[i, 2]] <= as.numeric(quant.p4))
+      height <- c(height, i)
+    if(plants[row,col] == 'p5' && class(possible.location) == "matrix" && terrain[possible.location[i, 1], possible.location[i, 2]] <= as.numeric(quant.p5))
         height <- c(height, i)
   }
 
   if(length(height) != 0)
     possible.location <- possible.location[- height, ]
 
+	print('height_end')
+	print(nrow(possible.location))
+
   # if there is only the origin left exit reproduce function **
-  if(class(possible.location) != "matrix")
+  if(class(possible.location) != "matrix" || length(possible.location) == 0)
     return(possible.location <- c(possible.location, row, col))
 
   # get rid of reproducing cell ** possible.location[i,1]
+	print('origin')
+	print(possible.location)
   origin <- numeric()
   for(i in 1: nrow(possible.location)){
     if(possible.location[i, 1] == row && possible.location[i, 2] == col)
       origin <- c(origin, i)
   }
-
-  possible.location <- possible.location[- origin, ]
+	print(origin)
+	print(length(origin) != 0)
+	if(length(origin) != 0){
+		print(possible.location)
+  	possible.location <- possible.location[- origin, ]
+		print(possible.location)
+	}
 
   # randomly select which location to reproduce in
+
+	print('possible location')
+	print(possible.location)
   new.location <- numeric()
   if(class(possible.location) != "matrix"){
     return(new.location <- c(new.location, possible.location[1], possible.location[2]))
@@ -171,10 +183,12 @@ plant.timestep <- function(plants, terrain){
       if(runif(1) <= .5){
         new.location <- new.loc.plant(plants, row, col, terrain)
         # checks for competetion
+				print(plants[new.location[1], new.location[2]] == "")
+				print(plants[new.location[1], new.location[2]])
         if(plants[new.location[1], new.location[2]] == ""){
           plants[new.location[1], new.location[2]] <- plants[row, col]
         }else{
-          compete(plants[row,col], plants[new.location[1], new.location[2]])
+          compete(plants[row, col], plants[new.location[1], new.location[2]])
         }
       }
       return(plants)
@@ -185,7 +199,7 @@ plant.timestep <- function(plants, terrain){
       for(c in 1:ncol(terrain)){
         plants[r, c] <- survive(plants[r, c])
         if(is.na(plants[r, c]) == FALSE && plants[r, c] != "")
-          plants <- reproduce.plant(r, c)
+          plants <- reproduce.plant(r, c, plants, terrain)
       }
     }
 
@@ -425,11 +439,11 @@ evo.test <- function(terrain, timesteps = 50, herbivore.health = 100, herbivore.
   # createing a log file for plants' enzymes
   file.create(file = "plant_enzymes.csv")
   a <- data.frame('enz1', 'enz2', 'enz3')
-  b <- data.frame(p1[1], p1[2], p1[3])
-  c <- data.frame(p2[1], p2[2], p2[3])
-  d <- data.frame(p3[1], p3[2], p3[3])
-  e <- data.frame(p4[1], p4[2], p4[3])
-  f <- data.frame(p5[1], p5[2], p5[3])
+  b <- data.frame(p1[1, 1], p1[2, 1], p1[3, 1])
+  c <- data.frame(p2[1, 1], p2[2, 1], p2[3, 1])
+  d <- data.frame(p3[1, 1], p3[2, 1], p3[3, 1])
+  e <- data.frame(p4[1, 1], p4[2, 1], p4[3, 1])
+  f <- data.frame(p5[1, 1], p5[2, 1], p5[3, 1])
   write.table(a, file = "plant_enzymes.csv", sep = ",", append = TRUE, quote = FALSE, col.names = FALSE, row.names = FALSE)
   write.table(b, file = "plant_enzymes.csv", sep = ",", append = TRUE, quote = FALSE, col.names = FALSE, row.names = FALSE)
   write.table(c, file = "plant_enzymes.csv", sep = ",", append = TRUE, quote = FALSE, col.names = FALSE, row.names = FALSE)
@@ -454,20 +468,20 @@ evo.test <- function(terrain, timesteps = 50, herbivore.health = 100, herbivore.
   # populating initial plant and herbivore timestep (at 0)
   for(r in 1:nrow(terrain)){
     for(c in 1:ncol(terrain)){
-      if(is.na(terrain[r,c])){
+      if(is.na(terrain[r,c]) && is.array(plant.generation)){
         plant.generation[r, c, 1] <- NA
         #herbivore.generation[r, c, 1] <- NA
-      }else if(terrain[r,c] <= quant.p1){
+      }else if(terrain[r,c] <= as.numeric(quant.p1)){
         # make sure plants are not placed outside of their quantile for height
-          plant.generation[r, c, 1] <- sample(c(p1, ""), size = 1)
-        }else if(terrain[r,c] <= quant.p2){
-          plant.generation[r, c, 1] <- sample(c(p2, ""), size = 1)
-        }else if(terrain[r,c] <= quant.p3){
-          plant.generation[r, c, 1] <- sample(c(p3, ""), size = 1)
-        }else if(terrain[r,c] <= quant.p4){
-          plant.generation[r, c, 1] <- sample(c(p4, ""), size = 1)
-        }else if(terrain[r,c] <= quant.p5)
-          plant.generation[r, c, 1] <- sample(c(p5, ""), size = 1)
+        plant.generation[r, c, 1] <- sample(c('p1', ""), size = 1)
+      }else if(terrain[r,c] <= as.numeric(quant.p2)){
+        plant.generation[r, c, 1] <- sample(c('p2', ""), size = 1)
+      }else if(terrain[r,c] <= as.numeric(quant.p3)){
+        plant.generation[r, c, 1] <- sample(c('p3', ""), size = 1)
+      }else if(terrain[r,c] <= as.numeric(quant.p4)){
+        plant.generation[r, c, 1] <- sample(c('p4', ""), size = 1)
+      }else if(terrain[r,c] <= as.numeric(quant.p5))
+        plant.generation[r, c, 1] <- sample(c('p5', ""), size = 1)
         #if(rnrom(1) <= herbivore.frac){
           ## select 3 most common enzymes that are present in any plants and randomly select the 4th enzyme from any of the remaining combinations
           #rand.enz <- sample(1, remainder)
@@ -528,4 +542,4 @@ to.dna <- function(to.use){
   }
 }
 
-##### end of to.dna
+##### end of to.dna (need to fix)
