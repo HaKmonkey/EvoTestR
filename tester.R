@@ -101,14 +101,9 @@ new.loc.plant <- function(plants, row, col, terrain){
   quant.p4 <- quantile(terrain, probs = seq(.6, .82), na.rm = TRUE)
   quant.p5 <- quantile(terrain, probs = seq(.8, 1), na.rm = TRUE)
 
-	print('height')
-	print(nrow(possible.location))
-	print(possible.location)
-	print(dim(possible.location))
-	print(length(possible.location))
   height <- numeric()
-  for(i in 1:nrow(possible.location)){
-    if(plants[row,col] == 'p1' && class(possible.location) == "matrix" && terrain[possible.location[i, 1], possible.location[i, 2]] <= as.numeric(quant.p1))
+	if(class(possible.location) != 'matrix'){
+		if(plants[row,col] == 'p1' && class(possible.location) == "matrix" && terrain[possible.location[i, 1], possible.location[i, 2]] <= as.numeric(quant.p1))
       height <- c(height, i)
     if(plants[row,col] == 'p2' && class(possible.location) == "matrix" && terrain[possible.location[i, 1], possible.location[i, 2]] <= as.numeric(quant.p2))
       height <- c(height, i)
@@ -118,38 +113,39 @@ new.loc.plant <- function(plants, row, col, terrain){
       height <- c(height, i)
     if(plants[row,col] == 'p5' && class(possible.location) == "matrix" && terrain[possible.location[i, 1], possible.location[i, 2]] <= as.numeric(quant.p5))
         height <- c(height, i)
-  }
+	} else{
+  	for(i in 1:nrow(possible.location)){
+    	if(plants[row,col] == 'p1' && class(possible.location) == "matrix" && terrain[possible.location[i, 1], possible.location[i, 2]] <= as.numeric(quant.p1))
+      	height <- c(height, i)
+    	if(plants[row,col] == 'p2' && class(possible.location) == "matrix" && terrain[possible.location[i, 1], possible.location[i, 2]] <= as.numeric(quant.p2))
+      	height <- c(height, i)
+    	if(plants[row,col] == 'p3' && class(possible.location) == "matrix" && terrain[possible.location[i, 1], possible.location[i, 2]] <= as.numeric(quant.p3))
+        height <- c(height, i)
+    	if(plants[row,col] == 'p4' && class(possible.location) == "matrix" && terrain[possible.location[i, 1], possible.location[i, 2]] <= as.numeric(quant.p4))
+      	height <- c(height, i)
+    	if(plants[row,col] == 'p5' && class(possible.location) == "matrix" && terrain[possible.location[i, 1], possible.location[i, 2]] <= as.numeric(quant.p5))
+        height <- c(height, i)
+  	}
+	}
 
   if(length(height) != 0)
     possible.location <- possible.location[- height, ]
-
-	print('height_end')
-	print(nrow(possible.location))
 
   # if there is only the origin left exit reproduce function **
   if(class(possible.location) != "matrix" || length(possible.location) == 0)
     return(possible.location <- c(possible.location, row, col))
 
   # get rid of reproducing cell ** possible.location[i,1]
-	print('origin')
-	print(possible.location)
   origin <- numeric()
   for(i in 1: nrow(possible.location)){
     if(possible.location[i, 1] == row && possible.location[i, 2] == col)
       origin <- c(origin, i)
   }
-	print(origin)
-	print(length(origin) != 0)
 	if(length(origin) != 0){
-		print(possible.location)
   	possible.location <- possible.location[- origin, ]
-		print(possible.location)
 	}
 
   # randomly select which location to reproduce in
-
-	print('possible location')
-	print(possible.location)
   new.location <- numeric()
   if(class(possible.location) != "matrix"){
     return(new.location <- c(new.location, possible.location[1], possible.location[2]))
@@ -183,8 +179,8 @@ plant.timestep <- function(plants, terrain){
       if(runif(1) <= .5){
         new.location <- new.loc.plant(plants, row, col, terrain)
         # checks for competetion
-				print(plants[new.location[1], new.location[2]] == "")
-				print(plants[new.location[1], new.location[2]])
+				#print(plants[new.location[1], new.location[2]] == "")
+				#print(plants[new.location[1], new.location[2]])
         if(plants[new.location[1], new.location[2]] == ""){
           plants[new.location[1], new.location[2]] <- plants[row, col]
         }else{
