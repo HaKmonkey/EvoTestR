@@ -451,15 +451,15 @@ evo.test <- function(terrain, timesteps = 50, herbivore.health = 100, herbivore.
   ## file.create("herbivore_log.csv")
   ## write.table(x, file = "herbivore_log.csv", sep = ",", append = TRUE, quote = FALSE, col.names = FALSE, row.names = FALSE)
 
-  #matrix.info <- c('ID', 'health', 'age', 'b1', 'b2', 'b3', 'b4', 'b5', 'b6', 'b7', 'b8', 'b9', 'b10', 'b11', 'b12', 'b13', 'b14', 'b15', 'b16', 'b17', 'b18', 'b19', 'b20')
-  #herbivore.log <- matrix(nrow = 1, ncol = 23) ## will use rbind to add new herbivores to the matrix
-  #colnames(herbivore.log) <- matrix.info
+  matrix.info <- c('ID', 'health', 'age', 'b1', 'b2', 'b3', 'b4', 'b5', 'b6', 'b7', 'b8', 'b9', 'b10', 'b11', 'b12', 'b13', 'b14', 'b15', 'b16', 'b17', 'b18', 'b19', 'b20')
+  herbivore.log <- matrix(nrow = 1, ncol = 23) ## will use rbind to add new herbivores to the matrix
+  colnames(herbivore.log) <- matrix.info
 
   # creating herbivore array
-  #herbivore.generation <- array(data = 0, dim = c(nrow(terrain), ncol(terrain), (timesteps + 1)))
-  #selected <- to.dna(to.use[1:3])
-  #remainder <- setdiff(enz, to.use[1:3])
-  #ID = 1 # identification for each herbivore made
+  herbivore.generation <- array(data = 0, dim = c(nrow(terrain), ncol(terrain), (timesteps + 1)))
+  selected <- to.dna(to.use[1:3])
+  remainder <- setdiff(enz, to.use[1:3])
+  ID = 1 # identification for each herbivore made
 
   # populating initial plant and herbivore timestep (at 0)
   for(r in 1:nrow(terrain)){
@@ -478,30 +478,30 @@ evo.test <- function(terrain, timesteps = 50, herbivore.health = 100, herbivore.
         plant.generation[r, c, 1] <- sample(c('p4', ""), size = 1)
       }else if(terrain[r,c] <= as.numeric(quant.p5))
         plant.generation[r, c, 1] <- sample(c('p5', ""), size = 1)
-        #if(rnrom(1) <= herbivore.frac){
+        if(rnrom(1) <= herbivore.frac){
           ## select 3 most common enzymes that are present in any plants and randomly select the 4th enzyme from any of the remaining combinations
-          #rand.enz <- sample(1, remainder)
-          #rand.enz <- to.dna(rand.enz)
-          #init.bases <- c(selected, rand.enz)
+          rand.enz <- sample(1, remainder)
+          rand.enz <- to.dna(rand.enz)
+          init.bases <- c(selected, rand.enz)
 
-          #herbivore.generation[r, c, 1] <- new.herbivore(herbivore.log, ID, herbivore.health, herbivore.age, init.bases[1], init.bases[2], init.bases[3], init.bases[4], init.bases[5], init.bases[6], init.bases[7], init.bases[8], init.bases[9], init.bases[10], init.bases[11], init.bases[12], init.bases[13], init.bases[14], init.bases[15], init.bases[16], init.bases[17], init.bases[18], init.bases[19], init.bases[20],)
-          #ID <- ID + 1
-        #}
-        #else{
-          #herbivore.generation[r, c, 1] <- 0
-        #}
+          herbivore.generation[r, c, 1] <- new.herbivore(herbivore.log, ID, herbivore.health, herbivore.age, init.bases[1], init.bases[2], init.bases[3], init.bases[4], init.bases[5], init.bases[6], init.bases[7], init.bases[8], init.bases[9], init.bases[10], init.bases[11], init.bases[12], init.bases[13], init.bases[14], init.bases[15], init.bases[16], init.bases[17], init.bases[18], init.bases[19], init.bases[20],)
+          ID <- ID + 1
+        }
+        else{
+          herbivore.generation[r, c, 1] <- 0
+        }
     }
   }
 
   # run each timestep of the simulation
   for(i in seq(2, timesteps + 1)){
     plant.generation[, , i] <- plant.timestep(plant.generation[, , (i - 1)], terrain)
-    #eco <- herbivore.timestep(herbivore.generation[, , (i - 1)], plant.generation[, , i], terrain, herbivore.health, herbivore.age, herbivore.frac, herbivore.repro, kill, ID)
-    #herbivore.generation[, , i] <- eco[[1]]
-    #plant.generation[, , i] <- eco[[2]]
+    eco <- herbivore.timestep(herbivore.generation[, , (i - 1)], plant.generation[, , i], terrain, herbivore.health, herbivore.age, herbivore.frac, herbivore.repro, kill, ID)
+    herbivore.generation[, , i] <- eco[[1]]
+    plant.generation[, , i] <- eco[[2]]
   }
-  #final.timestep <- as.matrix(plant.generation[, , timesteps +1])
-  #image(final.timestep, col = "purple", add = TRUE)
+  final.timestep <- as.matrix(plant.generation[, , timesteps +1])
+  image(final.timestep, col = "purple", add = TRUE)
   #return(list(plant.generation, herbivore.generation))
   return(plant.generation)
 }
@@ -529,8 +529,9 @@ to.dna <- function(to.use){
   dna.list <- as.matrix(expand.grid(DNA, DNA, DNA, DNA, DNA))
   temp <- 0
   for(i in 1:nrow(dna.list)){
-    if(temp == 3)
-      return bases
+    if(temp == 3){
+			return bases
+		}
     if(as.character(to.enz(dna.list[1,])) %in% to.use){
       bases <- c(bases, dna.list[1, ])
       temp <- temp + 1
