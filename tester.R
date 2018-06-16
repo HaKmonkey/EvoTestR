@@ -53,8 +53,8 @@ terrain <- function(n = 6 , water = .2, noise = c(5, 5)){
 	water <- replace(water, is.na(env), 1)
 
 	# imaging both the terrain and the water
-	# image(env, col = terrain.colors(length(env)))
-	# image(water, col = c(NA, "blue"), add = TRUE)
+	image(env, col = terrain.colors(length(env)))
+	image(water, col = c(NA, "blue"), add = TRUE)
 
 	return(env)
 }
@@ -478,7 +478,7 @@ evo.test <- function(terrain, timesteps = 50, herbivore.health = 100, herbivore.
         plant.generation[r, c, 1] <- sample(c('p4', ""), size = 1)
       }else if(terrain[r,c] <= as.numeric(quant.p5))
         plant.generation[r, c, 1] <- sample(c('p5', ""), size = 1)
-        if(rnrom(1) <= herbivore.frac){
+        if(rnorm(1) <= herbivore.frac){
           ## select 3 most common enzymes that are present in any plants and randomly select the 4th enzyme from any of the remaining combinations
           rand.enz <- sample(1, remainder)
           rand.enz <- to.dna(rand.enz)
@@ -516,8 +516,11 @@ to.enz <- function(b1, b2, b3, b4, b5){
   DNA <- list('A' = 0, 'T' = 1, 'G' = 2, 'C' = 3)
   Enz <- list('0' = 'a', '1' = 'b', '2' = 'c', '3' = 'd', '4' = 'e', '5' = 'f', '6' = 'g', '7' = 'h', '8' = 'i', '9' = 'j', '10' = 'k', '11' = 'l', '12' = 'm', '13' = 'n', '14' = 'o', '15' = 'p')
   temp <- 0
-  for(i in 1:length(x))
-    temp <- temp + as.integer(DNA[x[i]])
+  for(i in 1:length(x)){
+		base <- x[[i]]
+		print(base)
+    temp <- temp + DNA[[as.character(base)]]
+	}
   return(Enz[as.character(temp)])
 }
 
@@ -527,14 +530,14 @@ to.dna <- function(to.use){
   bases <- c()
   DNA <- list('A', 'T', 'G', 'C')
   dna.list <- as.matrix(expand.grid(DNA, DNA, DNA, DNA, DNA))
-  temp <- numeric()
+  temp <- c()
   for(i in 1:nrow(dna.list)){
-    if(temp == 4)
-			return(bases)
-    if(as.character(to.enz(dna.list[1,])) %in% to.use){
-      bases <- c(bases, dna.list[1, ])
+    if(as.character(to.enz(dna.list[i, 1], dna.list[i, 2], dna.list[i, 3], dna.list[i, 4], dna.list[i, 5])) %in% to.use && temp < 4){
+      bases <- c(bases, dna.list[i, ])
       temp <- temp + 1
-    }
+    } else {
+			return(bases)
+		}
   }
 }
 
