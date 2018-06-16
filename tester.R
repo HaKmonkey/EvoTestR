@@ -532,7 +532,7 @@ to.dna <- function(to.use){
   dna.list <- as.matrix(expand.grid(DNA, DNA, DNA, DNA, DNA))
   temp <- c()
   for(i in 1:nrow(dna.list)){
-    if(as.character(to.enz(dna.list[i, 1], dna.list[i, 2], dna.list[i, 3], dna.list[i, 4], dna.list[i, 5])) %in% to.use && temp < 4){
+    if(as.character(to.enz(dna.list[i, 1], dna.list[i, 2], dna.list[i, 3], dna.list[i, 4], dna.list[i, 5])) %in% to.use && temp < 3){
       bases <- c(bases, dna.list[i, ])
       temp <- temp + 1
     } else {
