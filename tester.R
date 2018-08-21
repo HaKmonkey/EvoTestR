@@ -1,7 +1,10 @@
+# function that creates terrain with varied heights
+# a user set perameter 'water' determines the lowest qantile of terrain that becomes 'NA'
+# a value of 'NA' becomes water
 terrain <- function(n = 6 , water = .2, noise = c(5, 5)){
 
+  # making the matrix for the terrain and assigning the 4 corners
 	make.terrain <- function(n, sd = noise[1]){
-		# making the maktrix for the terrain and assigning the 4 corners
 		env <- matrix (NA, nrow = 2 ^ n + 1, ncol = 2 ^ n + 1)
 		env[1,1] <- rnorm(1, 0, sd)
 		env[1,ncol(env)] <- rnorm(1, 0, sd)
@@ -10,16 +13,17 @@ terrain <- function(n = 6 , water = .2, noise = c(5, 5)){
 		return(env)
 	}
 
+  # finding the center and giving it a value - the average of the four corners
+  # to add noise to the terrain generation we change the standard deviation
 	diamond.step <- function(env, sd = noise[2]){
-		# finding the center and giving it a value
 		center <- mean(c(env[1,1], env[1,ncol(env)], env[ncol(env),1], env[ncol(env),ncol(env)]))
 		center <- rnorm(1, center, sd)
 		env[ceiling(ncol(env) / 2), ceiling(ncol(env) / 2)] <- center
 		return(env)
 	}
 
+    # finding the 4 points that corospond with the sides of each matrix and giving them values
 	square.step <- function(env, sd = noise[2]){
-		# finding the 4 points that corospond with the sides of each matrix and giving them values
 		center <- env[ceiling((ncol(env) / 2)), ceiling((ncol(env) / 2))]
 		env[1, ceiling(ncol(env) / 2)] <- rnorm(1, mean(c(env[1,1], env[1,ncol(env)], center)), sd)
 		env[ceiling(ncol(env) / 2), ncol(env)] <- rnorm(1, mean(c(env[1,ncol(env)], env[ncol(env),ncol(env)], center)), sd)
@@ -30,7 +34,12 @@ terrain <- function(n = 6 , water = .2, noise = c(5, 5)){
 
 	env <- make.terrain(n)
 
-	# loop through the subseted matricies and apply the diamond.step and then the square.step to all
+	# loop through the subseted matricies and apply the 'diamond.step' and then the 'square.step' to all
+  # '2 ^ (n:1)' gives an 'i' value to help subset the matrix into succesively smaller matricies
+  # 's' is a temporary value that becomes a sequence that will sub-setted for matrix coordinates
+  ## if n <- 4 your matrix will be 2^n+1 or 17x17
+  ## the first iteration of this loop 'i' will be 16, then 8, then 4, then 2
+  ## the 'object' 's' will then be the following sequences (1,17), (1,9,17), (1,5,9,13,17), & (1,3,5,7,9,11,13,15,17) 
 	for(i in 2 ^ (n:1)){
 		s <- seq(1,ncol(env), by = i)
 		for(r in 1:(length(s) - 1)){
@@ -53,16 +62,19 @@ terrain <- function(n = 6 , water = .2, noise = c(5, 5)){
 	water <- replace(water, is.na(env), 1)
 
 	# imaging both the terrain and the water
-	image(env, col = terrain.colors(length(env)))
-	image(water, col = c(NA, "blue"), add = TRUE)
+	#image(env, col = terrain.colors(length(env)))
+	#image(water, col = c(NA, "blue"), add = TRUE)
 
 	return(env)
 }
 
-terrain <- terrain() # example
+#terrain <- terrain() # example
 
 ##### end of terrain (know for sure that this function works) #####
 
+# Creates a plant with 3 enzymes and 3 values that are associated with the enzymes 
+# These values will be the amount of 'health' that is returned to the herbivore if it has that specific enzyme
+# a constant value will be added later (in a different function) that removes a set amount of health from a herbivore if it eats a plant without the propper enzyme
 new.plant <- function(enz1, enz2, enz3, val1 = 25, val2 = 12.5, val3 = 6.25){
   output <- matrix(c(enz1, enz2, enz3, val1, val2, val3), nrow = 3, ncol = 2)
 	return(output)
@@ -70,6 +82,10 @@ new.plant <- function(enz1, enz2, enz3, val1 = 25, val2 = 12.5, val3 = 6.25){
 
 ##### end of new.plant (this works, but creates a list. Will have to make sure there is no error in evo.test)
 
+# This function determines placement of the plants based on a quantile of terrain height
+# There are currently 5 quantiles because there are 5 plants
+# This could possibly be expanded or even turned into an option
+## User would select the number of plants and then that number of quantiles would be generated
 new.loc.plant <- function(plants, row, col, terrain){
   possible.location <- as.matrix(expand.grid(row + c(-1, 0, 1), col + c(-1, 0, 1)))
 
@@ -95,6 +111,7 @@ new.loc.plant <- function(plants, row, col, terrain){
 
   # get rid of values outside of the height limit
   # quantiles for terrain height that constrain plant placement
+  # *** Need to check why i check to see if 'possible.location' is not a matrix, but then check if it is a matrix anyway, and then document ***
   quant.p1 <- quantile(terrain, probs = .22, na.rm = TRUE)
   quant.p2 <- quantile(terrain, probs = seq(.2, .42), na.rm = TRUE)
   quant.p3 <- quantile(terrain, probs = seq(.4, .62), na.rm = TRUE)
