@@ -1,10 +1,8 @@
-# will be commenting out the herbivore sections to ensure 
-# that the plant generation and migration works
-
 # This is a function that creates terrain with varied heights.
 # A user set perameter 'water' determines the lowest qantile of 
 # terrain that becomes 'NA'.A value of 'NA' becomes water.
 terrain <- function(n = 6 , water = .2, noise = c(5, 5)){
+  print('terrain')
 
   # 'make.terrain' is making the matrix for the terrain and assigning the 4 corners.
 	make.terrain <- function(n, sd = noise[1]){
@@ -27,7 +25,7 @@ terrain <- function(n = 6 , water = .2, noise = c(5, 5)){
 	}
 
   # 'square.step' is finding the 4 points that corospond with the 
-  # corners of each matrix and giving them values
+  # corners of each matrix and giving them values.
 	square.step <- function(env, sd = noise[2]){
 		center <- env[ceiling((ncol(env) / 2)), ceiling((ncol(env) / 2))]
 		env[1, ceiling(ncol(env) / 2)] <- rnorm(1, mean(c(env[1,1], env[1,ncol(env)], center)), sd)
@@ -39,7 +37,7 @@ terrain <- function(n = 6 , water = .2, noise = c(5, 5)){
 
 	env <- make.terrain(n)
 
-	# Loop through the subseted matricies and apply the 'diamond.step' 
+  # Loop through the subseted matricies and apply the 'diamond.step' 
   # and then the 'square.step' to all. '2 ^ (n:1)' gives an 'i' value to 
   # help subset the matrix into succesively smaller matricies. 's' is a 
   # temporary value that becomes a sequence that will sub-setted for matrix coordinates.
@@ -84,8 +82,9 @@ terrain <- terrain() # example
 # These values will be the amount of 'health' that is returned to the herbivore 
 # if it has that specific enzyme. A constant value will be added later 
 # (in a different function) that removes a set amount of health from a herbivore 
-# if it eats a plant without the propper enzyme
+# if it eats a plant without the propper enzyme.
 new.plant <- function(enz1, enz2, enz3, val1 = 25, val2 = 12.5, val3 = 6.25){
+  print('new.plant')
   output <- matrix(c(enz1, enz2, enz3, val1, val2, val3), nrow = 3, ncol = 2)
 	return(output)
 }
@@ -95,11 +94,12 @@ new.plant <- function(enz1, enz2, enz3, val1 = 25, val2 = 12.5, val3 = 6.25){
 # This function determines placement of the plants based on a quantile of terrain height.
 # There are currently 5 quantiles because there are 5 plants.
 new.loc.plant <- function(plants, row, col, terrain){
+  print('new.loc.plant')
   possible.location <- as.matrix(expand.grid(row + c(-1, 0, 1), col + c(-1, 0, 1)))
 
   new.location <- numeric() # variable moved here because it is used at the end, and to help escape for terrain
 
-  # Get rid of the points outside of the 'terrain' matrix
+  # Get rid of the points outside of the 'terrain' matrix.
   out <- numeric()
   for(i in 1:nrow(possible.location)){
     if(possible.location[i, 1] > nrow(plants) || possible.location[i, 2] > nrow(plants) || possible.location[i, 1] == 0 || possible.location[i, 2] == 0 && class(possible.location) == "matrix")
@@ -126,12 +126,12 @@ new.loc.plant <- function(plants, row, col, terrain){
   quant.p4 <- quantile(terrain, probs = seq(.6, .82), na.rm = TRUE)
   quant.p5 <- quantile(terrain, probs = seq(.8, 1), na.rm = TRUE)
   
-  # Get rid of values outside of the height limit for each plant
+  # Get rid of values outside of the height limit for each plant.
   height <- numeric()
 	if(class(possible.location) != 'matrix'){
 		if(plants[row,col] == 'p1' && terrain[possible.location[1], possible.location[2]] <= as.numeric(quant.p1))
       return(possible.location <- c(possible.location, row, col))
-    if(plants[row,col] == 'p2' && terrain[possible.location[1], possible.location[2]] <= as.numeric(quant.p2))
+    if(plants[row,col] == 'p2sample' && terrain[possible.location[1], possible.location[2]] <= as.numeric(quant.p2))
       return(possible.location <- c(possible.location, row, col))
     if(plants[row,col] == 'p3' && terrain[possible.location[1], possible.location[2]] <= as.numeric(quant.p3))
       return(possible.location <- c(possible.location, row, col))
@@ -160,7 +160,7 @@ new.loc.plant <- function(plants, row, col, terrain){
 
   # If there is only the origin left exit reproduce function.
   if(class(possible.location) != "matrix" || length(possible.location) == 0)
-    return(possible.location <- c(possible.location, row, col))
+    return(possible.location <- c(possible.location, row, col))#
 
   # Get rid of current origin of plant.
   origin <- numeric()
@@ -185,12 +185,14 @@ new.loc.plant <- function(plants, row, col, terrain){
 
 # The 'plant.timestep' function contains all the functions that coincide with
 # biological processes that would occur during each generation. 
-plant.timestep <- function(plants, terrain){ 
+plant.timestep <- function(plants, terrain){
+  print('plant.timestep') 
 
     # This function determines if a plant in a given cell survives to the 
     # next generation. Currently all plants have an 80% chance of 
-    # survival via 'if(runif(1) <= .8) return(cell)'
+    # survival via 'if(runif(1) <= .8) return(cell)'.
     survive <- function(cell){
+      print('survive')
       if(is.na(cell))
         return(NA)
       if(cell == "")
@@ -206,6 +208,7 @@ plant.timestep <- function(plants, terrain){
     # levels against different plants. Currently all plants have a 
     # 50/50 chance of winning against each other to simplify the model.
     compete <- function(cell_1, cell_2){
+      print('compete')
       return(cell_2 <- sample(c(cell_1, cell_2), size = 1))
     }
 
@@ -214,7 +217,9 @@ plant.timestep <- function(plants, terrain){
     # has a 50/50 chance of reproducing into an adjecnt empty cell. If
     # the cell is not empty, the 'compete' function runs.
     reproduce.plant <- function(row, col, plants, terrain){
+      print('reproduce.plant')
       if(runif(1) <= .5){
+        print('plant is reproducing')
         new.location <- new.loc.plant(plants, row, col, terrain)
         # This 'if' statement checks for competetion.
         if(plants[new.location[1], new.location[2]] == ""){
@@ -244,6 +249,7 @@ plant.timestep <- function(plants, terrain){
 # the herbivore log matrix. The log file, 'herbivore.log' is instanciated
 # in the 'evo.test' function.  
 new.herbivore <- function(herbivore.log, ID, health, age, b1, b2, b3, b4, b5, b6, b7, b8, b9, b10, b11, b12, b13, b14, b15, b16, b17, b18, b19, b20){
+  print('new.herbivore')
   x <- matrix(c(ID, health, age, b1, b2, b3, b4, b5, b6, b7, b8, b9, b10, b11, b12, b13, b14, b15, b16, b17, b18, b19, b20), nrow = 1, ncol = 23)
   herbivore.log <- rbind(herbivore.log, x)
   ID <- ID + 1
@@ -264,6 +270,7 @@ new.herbivore <- function(herbivore.log, ID, health, age, b1, b2, b3, b4, b5, b6
 # just reproduction. The herbivore must actually leave the space it is in and
 # move to a new one.
 new.loc.herb <- function(mat, row, col){
+  print('new.loc.herb')
   possible.location <- as.matrix(expand.grid(row + c(-1, 0, 1), col + c(-1, 0, 1)))
 
   # Get rid of the points outside of the 'terrain' matrix
@@ -318,96 +325,220 @@ new.loc.herb <- function(mat, row, col){
 # The 'herbivore.timestep' function contains all the functions that coincide with
 # biological processes that would occur during each generation. The variables after 
 # 'ID' all have defaults in the 'evo.test' function.
-herbivore.timestep <- function(herbivores, plants, terrain, herbivore.log, ID, herb.kill, herbivore.health, herbivore.age, herbivore.repro){
+herbivore.timestep <- function(herbivores, plants, terrain, herbivore.log, ID, herb.kill, herbivore.health, herbivore.age, herbivore.repro, p1, p2, p3, p4, p5){
+  print('herbivore.timestep')
 
-    # This function executes if the herbivore kills a plant. Currently the 
-    # chance for killing a plant is set at a static 10%.
-    kill <- function(plants, row, col){
-    	if(runif(1) <= herb.kill)
-        	plants[row, col] <- ""
-        return(plants)
-    }
+  # This function executes if the herbivore kills a plant. Currently the 
+  # chance for killing a plant is set at a static 10%.
+  kill <- function(plants, row, col){
+    print('kill')
+    if(runif(1) <= herb.kill)
+      plants[row, col] <- ""
+    return(plants)
+  }
 
-    # This function executes when a herbivore reproduces. Currently the chance
-    # for reproducing is set at a static 50%. Both the 'herbivore.log' and the
-    # 'ID' are being updated within the 'new.herbivore' function. 
-    reproduce.herbivore <- function(herbivores, row, col, herbivore.log, herbivore.health, herbivore.age, herbivore.repro, ID, herb.id){
-      if(runif(1) <= herbivore.repro){
-      	new.location <- new.loc.herb(herbivores, row, col)
-        temp <- herbivore.log[which(herbivore.log[, 'ID'] == herb.id), ]
-        new.herbivore(ID, herbivore.health, herbivore.age, temp['b1'], temp['b2'], temp['b3'], temp['b4'], temp['b5'], temp['b6'], temp['b7'], temp['b8'], temp['b9'], temp['b10'], temp['b11'], temp['b12'], temp['b13'], temp['b14'], temp['b15'], temp['b16'], temp['b17'], temp['b18'], temp['b19'], temp['b20'])
-      	herbivores[new.location[1], new.location[2]] <- ID
-      	return(herbivores)
-      }
-    }
-
-    ## NOTE TO SELF!
-    ## Have to add a check for the propper enzymes to this function
-    ## This is where the real work begins O_O
-
-    # This function 
-    eat <- function(herbivores, plants, row, col, herb.kill, herbivore.log, herb.id){
+  # This function executes when a herbivore reproduces. Currently the chance
+  # for reproducing is set at a static 50%. Both the 'herbivore.log' and the
+  # 'ID' are being updated within the 'new.herbivore' function. 
+  reproduce.herbivore <- function(herbivores, row, col, herbivore.log, herbivore.health, herbivore.age,herbivore.repro, ID, herb.id){
+    print('reproduce.herbivore')
+    if(runif(1) <= herbivore.repro){
+      print('herbivore is reproducing')
+    	new.location <- new.loc.herb(herbivores, row, col)
       temp <- herbivore.log[which(herbivore.log[, 'ID'] == herb.id), ]
-      prob <- c(1 - as.int(temp['health'])/100, as.int(temp['health'])/100)
-      if(sample(c(TRUE, FALSE), 1, replace = FALSE, prob = prob)){
-      	## herbivores[row, col] <- 5
-        herb.id <- herbivores[r, c]
-        ## health is based on plaaaaaaaaants!
-        temp2 <- herbivore.log[which(herbivore.log[, 'ID'] == herb.id), ]
-      	kill(plants, row, col, herb.kill)
-      }else{
-      	move(herbivores, row, col)
-      }
-      return(list(herbivores, plants))
+      new.herbivore(ID, herbivore.health, herbivore.age, temp['b1'], temp['b2'], temp['b3'], temp['b4'], temp['b5'], temp['b6'], temp['b7'], temp['b8'], temp['b9'], temp['b10'], temp['b11'], temp['b12'], temp['b13'], temp['b14'], temp['b15'], temp['b16'], temp['b17'], temp['b18'], temp['b19'], temp['b20'])
+    	herbivores[new.location[1], new.location[2]] <- (ID-1)
+    	return(herbivores)
     }
+  }
 
-    # This functions executes the 'new.loc.herb' function. This
-    # function is acting as a wrapper so that the herbivore is 
-    # removed from its origional spot and put into the new spot.
-    move <- function(herbivores, row, col){
-      new.location <- new.loc.herb(herbivores, row, col)
-      herbivores[new.location[1], new.location[2]] <- herbivores[row, col]
-      herbivores[row, col] <- 0
-      return(herbivores)
-    }
+  ## NOTE TO SELF!
+  ## Have to add a check for the propper enzymes to this function
+  ## This is where the real work begins O_O
 
-    for(r in 1:nrow(terrain)){
-      for(c in 1:ncol(terrain)){
-        if(herbivores[r, c] != 0 && is.na(herbivores[r, c]) == FALSE){
-          if(is.na(plants[r, c]) == FALSE && plants[r, c] != ""){
-            herb.id <- herbivores[r, c]
-            temp <- herbivore.log[which(herbivore.log[, 'ID'] == herb.id), ]
-            if(as.int(temp['health']) >= 50){
-              reproduce.herbivore(herbivores, r, c, herbivore.log, herbivore.health, herbivore.age, herbivore.repro, ID, herb.id)
-            }
-            eat(herbivores, plants, r, c, herb.kill, herbivore.log, herb.id)
-          }else{
-            move(herbivores, r, c)
+  ## THOUGHT MAP
+  ## Have to add a check for the propper enzymes to this function
+  ## This is where the real work begins O_O
+
+  ## THOUGHT MAP
+  ## As an herbivore eats a plant a check needs to be done compairing
+  ## the enzymes that the herbivore makes to the required enzymes of 
+  ## the plant.
+  ##
+  ## $ = a check mark 
+  ##
+  ## STEP 1 $
+  ## Run the 'to.enz' function on the bases that the herbivore makes
+  ##
+  ## STEP 2 $
+  ## Compaire the enzymes to the 3 plant enzymes, which are stored as 
+  ## a matrix. (could use a dictionary to associate the health values 
+  ## correctly)
+  ##
+  ## Having to figure out how to pull the data from the plants while
+  ## the program is running.
+  ##
+  ## STEP 3 $
+  ## If there is a match, that amount of health is added to the herbivore's
+  ## health up to 100, never above. The herbivore can get health back for
+  ## every correct enzyme that it has. It does not get health back for an
+  ## incorrect enzyme.
+  ##
+  ## STEP 4 $
+  ## If the herbivore does not have any matches ('if') then it will
+  ## take a set amount of damage (almost like food poisioning).
+
+  # This function 
+  eat <- function(herbivores, plants, row, col, herb.kill, herbivore.log, herb.id, p1, p2, p3, p4, p5){
+    print('eat')
+    herb <- herbivore.log[which(herbivore.log[, 'ID'] == herb.id), ]
+    plant <- plants[row, col]
+    prob <- c(1 - as.int(herb['health'])/100, as.int(herb['health'])/100)
+    if(sample(c(TRUE, FALSE), 1, replace = FALSE, prob = prob)){
+
+      # This is converting the propper bases to the propper enzymes.
+      enz1 <- to.enz(herb['b1'], herb['b2'], herb['b3'], herb['b4'], herb['b5'])
+      enz2 <- to.enz(herb['b6'], herb['b7'], herb['b8'], herb['b9'], herb['b10'])
+      enz3 <- to.enz(herb['b11'], herb['b12'], herb['b13'], herb['b14'], herb['b15'])
+      enz4 <- to.enz(herb['b16'], herb['b17'], herb['b18'], herb['b19'], herb['b20'])
+
+      enz_list <- c(enz1, enz2, enz3, enz4)
+
+      # These conditional statements will help compair the herbivores enzymes
+      # to the corretc plant and adjust its health accordingly.
+      if(plant == 'p1'){
+        n <- which(p1 %in% enz_list)
+        if(length(n) != 0){
+          for(i in x){
+            herbivore.log['health'] <- as.character(as.double(herbivore.log['health']) + as.double(p1[i, 2]))
           }
         }
+      } else if(plant == 'p2'){
+        n <- which(p2 %in% enz_list)
+        if(length(n) != 0){
+          for(i in x){
+            herbivore.log['health'] <- as.character(as.double(herbivore.log['health']) + as.double(p2[i, 2]))
+          }
+        }
+      } else if(plant == 'p3'){
+        n <- which(p3 %in% enz_list)
+        if(length(n) != 0){
+          for(i in x){
+            herbivore.log['health'] <- as.character(as.double(herbivore.log['health']) + as.double(p3[i, 2]))
+          }
+        }
+      } else if(plant == 'p4'){
+        n <- which(p4 %in% enz_list)
+        if(length(n) != 0){
+          for(i in x){
+            herbivore.log['health'] <- as.character(as.double(herbivore.log['health']) + as.double(p4[i, 2]))
+          }
+        }
+      } if(plant == 'p5'){
+        n <- which(p5 %in% enz_list)
+        if(length(n) != 0){
+          for(i in x){
+            herbivore.log['health'] <- as.character(as.double(herbivore.log['health']) + as.double(p5[i, 2]))
+          }
+        }
+      } else {
+          herbivore.log['health'] <- as.character(as.double(herbivore.log['health']) - 10)
       }
+      if(as.double(herbivore.log['health']) > 100){
+        herbivore.log['health'] <- '100'
+      }
+
+      # This is run to see if the herbivore kills the plant while eating.
+      kill(plants, row, col, herb.kill)
+    }else{
+      move(herbivores, row, col)
     }
     return(list(herbivores, plants))
   }
 
+  # This functions executes the 'new.loc.herb' function. This
+  # function is acting as a wrapper so that the herbivore is 
+  # removed from its origional spot and put into the new spot.
+  move <- function(herbivores, row, col){
+    print('move')
+    new.location <- new.loc.herb(herbivores, row, col)
+    herbivores[new.location[1], new.location[2]] <- herbivores[row, col]
+    herbivores[row, col] <- 0
+    return(herbivores)
+  }
+
+  for(r in 1:nrow(terrain)){
+    for(c in 1:ncol(terrain)){
+      if(herbivores[r, c] != 0 && is.na(herbivores[r, c]) == FALSE){
+        if(is.na(plants[r, c]) == FALSE && plants[r, c] != ""){
+          herb.id <- herbivores[r, c]
+          temp <- herbivore.log[which(herbivore.log[, 'ID'] == herb.id), ]
+          if(as.int(temp['health']) >= 50){
+            reproduce.herbivore(herbivores, r, c, herbivore.log, herbivore.health, herbivore.age, herbivore.repro, ID, herb.id)
+          }
+          eat(herbivores, plants, r, c, herb.kill, herbivore.log, herb.id, p1, p2, p3, p4, p5)
+        }else{
+          move(herbivores, r, c)
+        }
+      }
+    }
+  }
+  return(list(herbivores, plants))
+}
+
 # END OF HERBIVORE.TIMESTEP
 
-evo.test <- function(terrain, timesteps = 50, herbivore.health = 100, herbivore.age = 50, herbivore.frac = .1, herbivore.repro = .5, herb.kill = .1){
-  #info.herb <- setup.herbivores(herbivore.health, herbivore.age, herbivore.frac, herbivore.repro, herb.kill)
+# This function converts 5 bases into a number that is associated
+# with the enzyme list and returnes the enzyme as a character.
+to.enz <- function(b1, b2, b3, b4, b5){
+  print('to.enz')
+  x <- list(b1, b2, b3, b4, b5)
+  DNA <- list('A' = 0, 'T' = 1, 'G' = 2, 'C' = 3)
+  Enz <- list('0' = 'a', '1' = 'b', '2' = 'c', '3' = 'd', '4' = 'e', '5' = 'f', '6' = 'g', '7' = 'h', '8' = 'i', '9' = 'j', '10' = 'k', '11' = 'l', '12' = 'm', '13' = 'n', '14' = 'o', '15' = 'p')
+  temp <- 0
+  for(i in 1:length(x)){
+		base <- x[[i]]
+    temp <- temp + DNA[[as.character(base)]]
+	}
+  return(Enz[as.character(temp)])
+}
 
-  # create plants array
+# END OF TO.ENZ
+
+to.dna <- function(to.use){
+  print('to.dna')
+  bases <- c()
+  DNA <- list('A', 'T', 'G', 'C')
+  dna.list <- as.matrix(expand.grid(DNA, DNA, DNA, DNA, DNA))
+  temp <- 0
+  for(i in 1:nrow(dna.list)){
+    enz <- to.enz(dna.list[i, 1], dna.list[i, 2], dna.list[i, 3], dna.list[i, 4], dna.list[i, 5])
+    if(temp < 3){
+      if(enz %in% to.use){
+        bases <- c(bases, dna.list[i, ])
+        temp <- temp + 1
+      }
+    } else {
+			return(bases)
+		}
+  }
+}
+
+# END OF TO.DNA (need to fix)
+
+evo.test <- function(terrain, timesteps = 50, herbivore.health = 100, herbivore.age = 50, herbivore.frac = .1, herbivore.repro = .5, herb.kill = .1){
+  print('evo.test')
+
+  # This creates the plants array.
   plant.generation <- array(data = "", dim = c(nrow(terrain), ncol(terrain), (timesteps + 1)))
 
-  # plants are randomly assigned the three enzymes that digest them
-  # the order of the enzymes gives the amount of health returned to the herbivore
+  # The plants are randomly assigned the three enzymes that 'digest them'.
+  # The order of the enzymes gives the amount of health returned to the herbivore.
   enz <- c('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p')
 
-  # assigning 3 unique enzymes to each plant
-  # different plants can share the same enzymes
-  ## could come back later and change this to a for loop to assign enzymes
-  ## would make a list of plants based on the n number of plants chosen
-  ## would loop that many times and iterate across all plants
-  ## this would also be good because it would get rid of the hard coding
+  # This is assigning 3 unique enzymes to each plant. Different plants can 
+  # share the same enzymes, but a single plant cannot have the same enzyme
+  # more than once.
   temp <- sample(enz, size = 3, replace = FALSE)
   p1 <- new.plant(temp[1], temp[2], temp[3])
   possible.enz <- c(temp[1], temp[2], temp[3])
@@ -428,7 +559,7 @@ evo.test <- function(terrain, timesteps = 50, herbivore.health = 100, herbivore.
   p5 <- new.plant(temp[1], temp[2], temp[3])
   possible.enz <- c(possible.enz, temp[1], temp[2], temp[3])
 
-  # creates count values for present enzymes
+  # This is creating count values for enzymes that are present.
   na = nb = nc = nd = ne = nf = ng = nh = ni = nj = nk = nl = nm = nn = no = np = 0
   for(i in 1:15){
     if(possible.enz[i] == 'a'){
@@ -466,8 +597,10 @@ evo.test <- function(terrain, timesteps = 50, herbivore.health = 100, herbivore.
     }
   }
 
-  # generates an ordered list of the most used to least used enzymes, will select the first 3 then 1 random one after
-  position <- c('na', 'nb', 'nc', 'nd', 'ne', 'nf', 'ng', 'nh', 'ni', 'nj', 'nk', 'nl', 'nm', 'nn', 'no', 'np')
+  # This generates an ordered list of the most used to least used enzymes.
+  # The 3 most common enzymes are then selected, along with a randome 
+  # enzyme to be number 4.
+  position <- c('na' = 'a', 'nb' = 'b', 'nc' = 'c', 'nd' = 'd', 'ne' = 'e', 'nf' = 'f', 'ng' = 'g', 'nh' = 'h', 'ni' = 'i', 'nj' = 'j', 'nk' = 'k', 'nl' = 'l', 'nm' = 'm', 'nn' = 'n', 'no' = 'o', 'np' = 'p')
   enz.count <- c(na, nb, nc, nd, ne, nf, ng, nh, ni, nj, nk, nl, nm, nn, no, np)
   to.use <- c()
   for(i in max(enz.count):1){
@@ -475,15 +608,16 @@ evo.test <- function(terrain, timesteps = 50, herbivore.health = 100, herbivore.
     to.use <- c(to.use, position[temp])
   }
 
-  # quantiles for terrain height that constrain plant placement
-  ## if I can automate the number and itteration of plants, I will have to come back and make sure the number of quantils is also automatically generated
+  # These are the quantiles for terrain height that constrain plant placement.
   quant.p1 <- quantile(terrain, probs = .22, na.rm = TRUE)
   quant.p2 <- quantile(terrain, probs = seq(.2, .42), na.rm = TRUE)
   quant.p3 <- quantile(terrain, probs = seq(.4, .62), na.rm = TRUE)
   quant.p4 <- quantile(terrain, probs = seq(.6, .82), na.rm = TRUE)
   quant.p5 <- quantile(terrain, probs = seq(.8, 1), na.rm = TRUE)
 
-  # creating a log file for plants' enzymes
+  # This creates a log file for plants' enzymes. This is not used for
+  # storing any information that is used in the program, but could be
+  # useful for finding paterns.
   file.create(file = "plant_enzymes.csv")
   a <- data.frame('enz1', 'enz2', 'enz3')
   b <- data.frame(p1[1, 1], p1[2, 1], p1[3, 1])
@@ -498,31 +632,35 @@ evo.test <- function(terrain, timesteps = 50, herbivore.health = 100, herbivore.
   write.table(e, file = "plant_enzymes.csv", sep = ",", append = TRUE, quote = FALSE, col.names = FALSE, row.names = FALSE)
   write.table(f, file = "plant_enzymes.csv", sep = ",", append = TRUE, quote = FALSE, col.names = FALSE, row.names = FALSE)
 
-  # creating a log matrix to keep track of herbivores
-  ## file.create("herbivore_log.csv")
-  ## write.table(x, file = "herbivore_log.csv", sep = ",", append = TRUE, quote = FALSE, col.names = FALSE, row.names = FALSE)
+  # This is creating a log matrix to keep track of herbivores.
+  # This is not currently being used...
+  # file.create("herbivore_log.csv")
+  # write.table(x, file = "herbivore_log.csv", sep = ",", append = TRUE, quote = FALSE, col.names = FALSE, row.names = FALSE)
 
-  # 'matrix.info' are the titles for the information in the matrix
-  # this is done this way to variables can be refered to by their name in the matrix
+  # 'matrix.info' are the titles for the information in the matrix.
+  # This is done this way to variables can be refered to by their 
+  # name in the matrix
   matrix.info <- c('ID', 'health', 'age', 'b1', 'b2', 'b3', 'b4', 'b5', 'b6', 'b7', 'b8', 'b9', 'b10', 'b11', 'b12', 'b13', 'b14', 'b15', 'b16', 'b17', 'b18', 'b19', 'b20')
 
   herbivore.log <- matrix(nrow = 1, ncol = 23) # will use rbind to add new herbivores to the matrix
   colnames(herbivore.log) <- matrix.info
 
-  # creating herbivore array
+  # This creates the herbivore array.
   herbivore.generation <- array(data = 0, dim = c(nrow(terrain), ncol(terrain), (timesteps + 1)))
-  # selected <- to.dna(to.use[1:3])
-  # remainder <- setdiff(enz, to.use[1:3])
-  # ID = 1 # identification for each herbivore made
+  selected <- to.dna(to.use[1:3])
+  remainder <- setdiff(enz, to.use[1:3])
+  ID = 1 # identification for each herbivore made
 
-  # populating initial plant and herbivore timestep (at 0)
+  # These 'for' loops are populating initial plant and 
+  # herbivore timesteps (at 0).
   for(r in 1:nrow(terrain)){
     for(c in 1:ncol(terrain)){
       if(is.na(terrain[r,c]) && is.array(plant.generation)){
         plant.generation[r, c, 1] <- NA
-        #herbivore.generation[r, c, 1] <- NA
+        herbivore.generation[r, c, 1] <- NA
+      # These conditional statements make sure that plants are not 
+      # placed outside of their quantile for height.
       }else if(terrain[r,c] <= as.numeric(quant.p1)){
-        # make sure plants are not placed outside of their quantile for height
         plant.generation[r, c, 1] <- sample(c('p1', ""), size = 1)
       }else if(terrain[r,c] <= as.numeric(quant.p2)){
         plant.generation[r, c, 1] <- sample(c('p2', ""), size = 1)
@@ -530,71 +668,43 @@ evo.test <- function(terrain, timesteps = 50, herbivore.health = 100, herbivore.
         plant.generation[r, c, 1] <- sample(c('p3', ""), size = 1)
       }else if(terrain[r,c] <= as.numeric(quant.p4)){
         plant.generation[r, c, 1] <- sample(c('p4', ""), size = 1)
-      }else if(terrain[r,c] <= as.numeric(quant.p5))
+      }else if(terrain[r,c] <= as.numeric(quant.p5)){
         plant.generation[r, c, 1] <- sample(c('p5', ""), size = 1)
-        # if(rnorm(1) <= herbivore.frac){
-        #   ## select 3 most common enzymes that are present in any plants and randomly select the 4th enzyme from any of the remaining combinations
-        #   rand.enz <- sample(1, remainder)
-        #   rand.enz <- to.dna(rand.enz)
-        #   init.bases <- c(selected, rand.enz)
+      }
 
-        #   herbivore.generation[r, c, 1] <- new.herbivore(herbivore.log, ID, herbivore.health, herbivore.age, init.bases[1], init.bases[2], init.bases[3], init.bases[4], init.bases[5], init.bases[6], init.bases[7], init.bases[8], init.bases[9], init.bases[10], init.bases[11], init.bases[12], init.bases[13], init.bases[14], init.bases[15], init.bases[16], init.bases[17], init.bases[18], init.bases[19], init.bases[20],)
-        #   ID <- ID + 1
-        # }
-        # else{
-        #   herbivore.generation[r, c, 1] <- 0
-        # }
+      if(rnorm(1) <= herbivore.frac){
+      # This selects the 3 most common enzymes that are present in any 
+      # plants and randomly selects the 4th enzyme from any of the 
+      # remaining enzymes.
+      ## print('eek coffee hours on Fridays at 10:00 am in BNR 202A. The Biology Graduate Student Association has generously offered to host the first coffee hour of the fall semester on Friday, September 7 (at 10:00 am in BNR 202A). We need lab groups and other units to sign up to host future coffee hours. We have a special coffee hour planned for later in the semester to honor and thank former Department Head, Dr. Al Savitzky, for his many years of service and leadership to the Department.sample: rand.enz')
+      ## cat('to .use: ' , to.use, '\n')
+      ## cat('toPlease contact Katriel Cloward in the Main Biology Office to sign up to host a coffee hour this fall..use[1:3]: ' , to.use[1:3], '\n')
+      ## cat('re mainder' , remainder, '\n')
+      rand.enz <- sample(remainder, size = 1, replace = FALSE)
+      rand.enz <- to.dna(rand.enz)
+      init.bases <- c(selected, rand.enz)
+
+      new.herbivore(herbivore.log, ID, herbivore.health, herbivore.age, init.bases[1], init.bases[2], init.bases[3], init.bases[4], init.bases[5], init.bases[6], init.bases[7], init.bases[8], init.bases[9], init.bases[10], init.bases[11], init.bases[12], init.bases[13], init.bases[14], init.bases[15], init.bases[16], init.bases[17], init.bases[18], init.bases[19], init.bases[20])
+
+      herbivore.generation[r, c, 1] <- (ID - 1)
+      }else{
+        herbivore.generation[r, c, 1] <- 0
+      }
     }
   }
 
-  # run each timestep of the simulation
+  # This 'for' loop runs each timestep of the simulation.
   for(i in seq(2, timesteps + 1)){
     plant.generation[, , i] <- plant.timestep(plant.generation[, , (i - 1)], terrain)
-    # eco <- herbivore.timestep(herbivore.generation[, , (i - 1)], plant.generation[, , i], terrain, herbivore.health, herbivore.age, herbivore.frac, herbivore.repro, kill, ID)
-    # herbivore.generation[, , i] <- eco[[1]]
-    # plant.generation[, , i] <- eco[[2]]
+    eco <- herbivore.timestep(herbivore.generation[, , (i - 1)], plant.generation[, , i], terrain, herbivore.log, ID, herb.kill, herbivore.health, herbivore.age, herbivore.repro, p1, p2, p3, p4, p5)
+    herbivore.generation[, , i] <- eco[[1]]
+    plant.generation[, , i] <- eco[[2]]
   }
   final.timestep <- as.matrix(plant.generation[, , timesteps +1])
   # image(final.timestep, col = "purple", add = TRUE)
-  #return(list(plant.generation, herbivore.generation))
-  return(plant.generation)
+  return(list(plant.generation, herbivore.generation))
 }
 
 test <- evo.test(terrain)
 
-##### end of evo.test
-
-# these functions are not needed until the herbivores are back in action
-
-# function that converts 5 base sequence into the enzyme (number)
-to.enz <- function(b1, b2, b3, b4, b5){
-  x <- list(b1, b2, b3, b4, b5)
-  DNA <- list('A' = 0, 'T' = 1, 'G' = 2, 'C' = 3)
-  Enz <- list('0' = 'a', '1' = 'b', '2' = 'c', '3' = 'd', '4' = 'e', '5' = 'f', '6' = 'g', '7' = 'h', '8' = 'i', '9' = 'j', '10' = 'k', '11' = 'l', '12' = 'm', '13' = 'n', '14' = 'o', '15' = 'p')
-  temp <- 0
-  for(i in 1:length(x)){
-		base <- x[[i]]
-		print(base)
-    temp <- temp + DNA[[as.character(base)]]
-	}
-  return(Enz[as.character(temp)])
-}
-
-##### end of to.enz
-
-to.dna <- function(to.use){
-  bases <- c()
-  DNA <- list('A', 'T', 'G', 'C')
-  dna.list <- as.matrix(expand.grid(DNA, DNA, DNA, DNA, DNA))
-  temp <- c()
-  for(i in 1:nrow(dna.list)){
-    if(as.character(to.enz(dna.list[i, 1], dna.list[i, 2], dna.list[i, 3], dna.list[i, 4], dna.list[i, 5])) %in% to.use && temp < 3){
-      bases <- c(bases, dna.list[i, ])
-      temp <- temp + 1
-    } else {
-			return(bases)
-		}
-  }
-}
-
-##### end of to.dna (need to fix)
+# END OF EVO.TEST
